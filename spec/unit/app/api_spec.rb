@@ -42,13 +42,13 @@ module Todoable
             .and_return(RecordResult.new(false, nil, 'List does not exist'))
         end
 
-        it 'returns an empty array as JSON' do
+        it 'returns a helpful error message' do
           get '/lists/52'
           parsed = JSON.parse(last_response.body)
           expect(parsed).to include('error' => 'List does not exist')
         end
 
-        it 'responds with 200(OK)' do
+        it 'responds with 404' do
           get '/lists/52'
           expect(last_response.status).to eq(404)
         end
