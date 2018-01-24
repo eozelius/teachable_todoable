@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'json'
+require_relative 'ledger'
 
 module Todoable
   class API < Sinatra::Base
@@ -17,8 +18,14 @@ module Todoable
     post '/lists' do
       list = JSON.parse(request.body.read)
       result = @ledger.record(list)
-      status 201
-      JSON.generate('list_id' => result.list_id)
+
+      if result.success?
+        status 201
+        JSON.generate('list_id' => result.list_id)
+      else
+        status 422
+        JSON.generate('error' => result.error_message)
+      end
     end
 
     # Retrieve the list information

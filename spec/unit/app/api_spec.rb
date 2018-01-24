@@ -2,8 +2,6 @@ require_relative '../../../app/api'
 require 'rack/test'
 
 module Todoable
-  RecordResult = Struct.new(:success?, :list_id, :error_message)
-
   RSpec.describe API do
     include Rack::Test::Methods
 
@@ -36,8 +34,23 @@ module Todoable
       end
 
       context 'when the expense fails validation' do
-        it 'returns a helpful error message'
-        it 'responds with a 422 (Unprocessable entity)'
+        let(:list) { { 'some' => 'dummy_data' } }
+
+        before do
+          allow(ledger).to receive(:record)
+            .with(list)
+            .and_return(RecordResult.new(false, 417, 'List Incomplete'))
+        end
+
+        it 'returns a helpful error message' do
+          post '/lists', JSON.generate(list)
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include('error' => 'List Incomplete')
+        end
+        it 'responds with a 422 (Unprocessable entity)' do
+          post '/lists', JSON.generate(list)
+          expect(last_response.status).to eq(422)
+        end
       end
     end
   end
