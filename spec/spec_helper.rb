@@ -13,6 +13,11 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  # Examples tagged with :db meta will automatically load support/db
+  config.when_first_matching_example_defined(:db) do
+    require_relative 'support/db'
+  end
+
   # config.profile_examples = 5
   config.order = :random
   config.filter_run_when_matching :focus

@@ -3,7 +3,7 @@ require 'json'
 require_relative '../../app/api'
 
 module Todoable
-  RSpec.describe 'Todoable API' do
+  RSpec.describe 'Todoable API', :db do
     include Rack::Test::Methods # 'post' to send an api request to our directly instead of creating an actually http request
 
     def post_list(list)
