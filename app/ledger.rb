@@ -3,7 +3,9 @@ module Todoable
 
   class Ledger
     def record(list)
+    end
 
+    def retrieve(list_id)
     end
   end
 end

@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'json'
+require 'byebug'
 require_relative 'ledger'
 
 module Todoable
@@ -30,6 +31,15 @@ module Todoable
 
     # Retrieve the list information
     get '/lists/:list_id' do
+      result = @ledger.retrieve(params[:list_id])
+
+      if result.success?
+        status 201
+        JSON.generate('list_id' => result.list_id)
+      else
+        status 404
+        JSON.generate('error' => result.error_message)
+      end
     end
 
     # Updates the list

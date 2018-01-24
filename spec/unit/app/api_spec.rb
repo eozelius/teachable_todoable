@@ -11,6 +11,50 @@ module Todoable
 
     let(:ledger) { instance_double('Todoable::Ledger') }
 
+    describe 'GET /lists/:list_id' do
+      context 'when list with given id exists' do
+        let(:list_id) { '42' }
+
+        before do
+          allow(ledger).to receive(:retrieve)
+            .with(list_id)
+            .and_return(RecordResult.new(true, 42, nil))
+        end
+
+        it 'returns the list as JSON' do
+          get '/lists/42'
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include('list_id' => 42)
+        end
+
+        it 'responds with 200' do
+          get '/lists/42'
+          expect(last_response.status).to eq(201)
+        end
+      end
+
+      context 'when the list with given id does Not exist' do
+        let(:list_id) { '52' }
+
+        before do
+          allow(ledger).to receive(:retrieve)
+            .with(list_id)
+            .and_return(RecordResult.new(false, nil, 'List does not exist'))
+        end
+
+        it 'returns an empty array as JSON' do
+          get '/lists/52'
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include('error' => 'List does not exist')
+        end
+
+        it 'responds with 200(OK)' do
+          get '/lists/52'
+          expect(last_response.status).to eq(404)
+        end
+      end
+    end
+
     describe 'POST /lists' do
       context 'when the expense is successfully recorded' do
         let(:list) { { 'some' => 'dummy_data' } }
