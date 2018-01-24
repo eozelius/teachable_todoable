@@ -1,3 +1,5 @@
+require_relative '../config/sequel'
+
 module Todoable
   RecordResult = Struct.new(:success?, :list_id, :error_message)
 

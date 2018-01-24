@@ -1,5 +1,4 @@
 require_relative '../../../app/ledger'
-require_relative '../../../config/sequel'
 
 module Todoable
   RSpec.describe Ledger, :db do
