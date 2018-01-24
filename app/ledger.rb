@@ -1,5 +1,3 @@
-require 'byebug'
-
 module Todoable
   RecordResult = Struct.new(:success?, :list_id, :error_message)
 
@@ -16,6 +14,7 @@ module Todoable
     end
 
     def retrieve(list_id)
+      DB[:lists].where(id: list_id).all
     end
   end
 end

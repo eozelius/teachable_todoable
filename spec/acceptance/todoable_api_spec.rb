@@ -18,25 +18,17 @@ module Todoable
       Todoable::API.new
     end
 
-    it 'creates a todo list' do
-      pending 'need to save lists'
-
+    it 'records submitted lists' do
       urgent = post_list({
-        list: {
-          name: "Urgent Things"
-        }
+        'name' => "Urgent Things"
       })
 
       medium = post_list({
-        list: {
-          name: 'Medium Priority'
-        }
+        'name' => 'Medium Priority'
       })
 
       low = post_list({
-        list: {
-          name: 'Low Priority'
-        }
+        'name' => 'Low Priority'
       })
 
       get '/lists'

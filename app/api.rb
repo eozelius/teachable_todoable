@@ -1,6 +1,5 @@
 require 'sinatra/base'
 require 'json'
-require 'byebug'
 require_relative 'ledger'
 
 module Todoable
@@ -12,7 +11,8 @@ module Todoable
 
     # Retrieves all lists
     get '/lists' do
-      JSON.generate([])
+      lists = DB[:lists].all
+      JSON.generate(lists)
     end
 
     # Creates a list
