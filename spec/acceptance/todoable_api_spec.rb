@@ -22,20 +22,20 @@ module Todoable
       pending 'need to save lists'
 
       urgent = post_list({
-        'list': {
-          'name': "Urgent Things"
+        list: {
+          name: "Urgent Things"
         }
       })
 
       medium = post_list({
-        'list': {
-          'name': 'Medium Priority'
+        list: {
+          name: 'Medium Priority'
         }
       })
 
       low = post_list({
-        'list': {
-          'name': 'Low Priority'
+        list: {
+          name: 'Low Priority'
         }
       })
 

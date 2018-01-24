@@ -12,4 +12,11 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  # config.profile_examples = 5
+  config.order = :random
+  config.filter_run_when_matching :focus
+  config.filter_gems_from_backtrace 'rack', 'rack-test', 'sinatra'
+  config.default_formatter = "doc" if config.files_to_run.one?
+  Kernel.srand config.seed
 end
