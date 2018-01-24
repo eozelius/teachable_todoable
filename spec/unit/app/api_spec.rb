@@ -15,24 +15,21 @@ module Todoable
 
     describe 'POST /lists' do
       context 'when the expense is successfully recorded' do
-        it 'returns the list id' do
-          list = { 'some' => 'dummy_data' }
+        let(:list) { { 'some' => 'dummy_data' } }
 
+        before do
           allow(ledger).to receive(:record)
             .with(list)
             .and_return(RecordResult.new(true, 417, nil))
+        end
 
+        it 'returns the list id' do
           post '/lists', JSON.generate(list)
           parsed = JSON.parse(last_response.body)
           expect(parsed).to include('list_id' => 417)
         end
 
         it 'responds with a 201 (OK)' do
-          list = { 'some' => 'dummy_data' }
-          allow(ledger).to receive(:record)
-            .with(list)
-            .and_return(RecordResult.new(true, 417, nil))
-
           post '/lists', JSON.generate(list)
           expect(last_response.status).to eq(201)
         end
