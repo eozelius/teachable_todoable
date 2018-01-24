@@ -3,6 +3,11 @@ require 'json'
 
 module Todoable
   class API < Sinatra::Base
+    def initialize(ledger: Ledger.new)
+      @ledger = ledger
+      super()
+    end
+
     # Retrieves all lists
     get '/lists' do
       JSON.generate([])
@@ -10,7 +15,10 @@ module Todoable
 
     # Creates a list
     post '/lists' do
-      JSON.generate('list_id' => 42)
+      list = JSON.parse(request.body.read)
+      result = @ledger.record(list)
+      status 201
+      JSON.generate('list_id' => result.list_id)
     end
 
     # Retrieve the list information

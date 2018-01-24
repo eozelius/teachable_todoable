@@ -8,7 +8,7 @@ module Todoable
 
     def post_list(list)
       post '/lists', JSON.generate(list)
-      expect(last_response.status).to eq(200)
+      expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
       expect(parsed).to include('list_id' => a_kind_of(Integer))
       list.merge('id' => parsed['list_id'])
