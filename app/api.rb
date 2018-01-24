@@ -5,10 +5,12 @@ module Todoable
   class API < Sinatra::Base
     # Retrieves all lists
     get '/lists' do
+      JSON.generate([])
     end
 
     # Creates a list
     post '/lists' do
+      JSON.generate('list_id' => 42)
     end
 
     # Retrieve the list information
