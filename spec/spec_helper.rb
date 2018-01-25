@@ -1,4 +1,11 @@
 ENV['RACK_ENV'] = 'test'
+
+if ENV['RACK_ENV'] == 'test'
+  require 'simplecov'
+  SimpleCov.start 'rails'
+  puts "required simplecov"
+end
+
 require "bundler/setup"
 require "todoable"
 

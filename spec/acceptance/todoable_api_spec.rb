@@ -18,7 +18,7 @@ module Todoable
       Todoable::API.new
     end
 
-    it 'records submitted lists' do
+    it 'records submitted lists, and retrieves them' do
       urgent = post_list({
         'name' => "Urgent Things"
       })
