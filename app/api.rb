@@ -29,7 +29,7 @@ module Todoable
       end
     end
 
-    # Retrieve the list information
+    # Retrieve a single list
     get '/lists/:list_id' do
       result = @ledger.retrieve(params[:list_id])
 

@@ -6,7 +6,7 @@ module Todoable
   class Ledger
     def record(list)
       unless list.key?('name')
-        message = 'Invalid list: `name is required`'
+        message = 'Error name cannot be blank'
         return RecordResult.new(false, nil, message)
       end
 

@@ -11,6 +11,7 @@ module Todoable
 
     let(:ledger) { instance_double('Todoable::Ledger') }
 
+    # Retrieve a single list
     describe 'GET /lists/:list_id' do
       context 'when list with given id exists' do
         let(:list_id) { '42' }
@@ -34,7 +35,7 @@ module Todoable
       end
 
       context 'when the list with given id does Not exist' do
-        let(:list_id) { '52' }
+        let(:list_id) { '-1' }
 
         before do
           allow(ledger).to receive(:retrieve)
@@ -43,21 +44,22 @@ module Todoable
         end
 
         it 'returns a helpful error message' do
-          get '/lists/52'
+          get '/lists/-1'
           parsed = JSON.parse(last_response.body)
           expect(parsed).to include('error' => 'List does not exist')
         end
 
         it 'responds with 404' do
-          get '/lists/52'
+          get '/lists/-1'
           expect(last_response.status).to eq(404)
         end
       end
     end
 
+    # Creates a list
     describe 'POST /lists' do
-      context 'when the expense is successfully recorded' do
-        let(:list) { { 'some' => 'dummy_data' } }
+      context 'when the list is successfully recorded' do
+        let(:list) { { 'list_name' => 'dummy_data' } }
 
         before do
           allow(ledger).to receive(:record)
@@ -78,21 +80,21 @@ module Todoable
       end
 
       context 'when the expense fails validation' do
-        let(:list) { { 'some' => 'dummy_data' } }
+        let(:invalid_list) { { 'list_name' => '' } }
 
         before do
           allow(ledger).to receive(:record)
-            .with(list)
-            .and_return(RecordResult.new(false, 417, 'List Incomplete'))
+            .with(invalid_list)
+            .and_return(RecordResult.new(false, 417, 'Error name cannot be blank'))
         end
 
         it 'returns a helpful error message' do
-          post '/lists', JSON.generate(list)
+          post '/lists', JSON.generate(invalid_list)
           parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('error' => 'List Incomplete')
+          expect(parsed).to include('error' => 'Error name cannot be blank')
         end
         it 'responds with a 422 (Unprocessable entity)' do
-          post '/lists', JSON.generate(list)
+          post '/lists', JSON.generate(invalid_list)
           expect(last_response.status).to eq(422)
         end
       end
