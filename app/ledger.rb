@@ -28,7 +28,13 @@ module Todoable
     def fetch_all_records
       records = []
       lists = DB[:lists].all
-      lists.each { |l| records.push(RecordResult.new(true, l[:id], l[:name], nil)) }
+
+      if lists.empty?
+        RecordResult.new(false, nil, nil, 'No lists exists')
+      else
+        lists.each { |l| records.push(RecordResult.new(true, l[:id], l[:name], nil)) }
+        records
+      end
     end
 
     def fetch_single_record(list_id)
