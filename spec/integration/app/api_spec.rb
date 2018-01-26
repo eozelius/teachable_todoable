@@ -156,7 +156,11 @@ module Todoable
       end
 
       context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
-        it 'returns a helpful error message'
+        it 'returns a helpful error message' do
+          patch '/lists/1', JSON.generate('incorrect_name' => [])
+          parsed = JSON.parse(last_response.body)
+          expect(parsed['error_message']).to eq('Error - must provide a valid id and name')
+        end
         #it 'responds with status code 422'
         #it 'Does NOT update the list'
       end

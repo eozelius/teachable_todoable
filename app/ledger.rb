@@ -32,8 +32,8 @@ module Todoable
     def update(list_id, new_name)
       # todo: this should be combined into ONE DB request to save time/resources
       list = DB[:lists].where(id: list_id).all
-      if list.empty?
-        RecordResult.new(false, [], 'List does not exist')
+      if list.empty? || new_name["name"].class != String || list_id.class != String
+        RecordResult.new(false, [], 'Error - must provide a valid id and name')
       else
         DB[:lists].where(id: list_id).update(:name => new_name["name"])
         reloaded_name = DB[:lists].where(id: list_id).all[0][:name]

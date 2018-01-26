@@ -49,16 +49,16 @@ module Todoable
 
     # Updates the list
     patch '/lists/:list_id' do
+      # todo scrub these inputs
       new_name = JSON.parse(request.body.read)
       list_id  = params[:list_id]
       update = @ledger.update(list_id, new_name)
-
       if update.success?
         status 201
         JSON.generate(update.response)
       else
         status 422
-        message = 'List does not exist'
+        message = 'Error - must provide a valid id and name'
         JSON.generate('error_message' => message)
       end
     end
