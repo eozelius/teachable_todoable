@@ -20,6 +20,7 @@ module Todoable
 
     let(:parsed) { JSON.parse(last_response.body) }
 
+    # Retrieves lists
     describe 'GET /lists' do
       context 'when NO lists exist' do
         it 'returns []' do
@@ -50,21 +51,6 @@ module Todoable
         end
 
         it 'returns all lists' do
-          # {
-          #   "lists": [
-          #     {
-          #       "name": "Urgent Things",
-          #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
-          #       "id":  ":list_id"
-          #     },
-          #     {
-          #       "name": "Shopping List",
-          #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
-          #       "id":  ":list_id"
-          #     },
-          #   ]
-          # }
-
           get '/lists'
           expect(parsed['lists'].count).to eq(3)
           expect(parsed['lists']).to include(
@@ -95,7 +81,7 @@ module Todoable
         #   }
         # }
 
-        it 'returns the list id' do
+        it 'returns the list name' do
           list = { 'name' => 'important things' }
           post_list(list)
           expect(parsed).to include('list' => { 'name' => 'important things' })
@@ -109,6 +95,34 @@ module Todoable
           parsed = JSON.parse(last_response.body)
           expect(last_response.status).to eq(422)
           expect(parsed['error_message']).to eq('Error name cannot be blank')
+        end
+      end
+    end
+
+    # Retrieve a single list
+    describe 'GET /lists/:list_id' do
+      context 'when List exists' do
+        it 'returns the list' do
+          list = { 'name' => 'important things' }
+          post_list(list)
+          get 'lists/1'
+        end
+      end
+
+      context 'when List does NOT exist' do
+        it 'returns a 404' do
+          get '/lists/-1'
+          expect(last_response.status).to eq(404)
+        end
+
+        it 'provides a helpful error message' do
+          get '/lists/-1'
+          expect(parsed["error_message"]).to eq('List does not exist')
+        end
+
+        it 'returns a nil List' do
+          get '/lists/-1'
+          expect(parsed["list"]).to eq(nil)
         end
       end
     end
