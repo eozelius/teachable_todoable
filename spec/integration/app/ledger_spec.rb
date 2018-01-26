@@ -3,11 +3,6 @@ require_relative '../../../app/ledger'
 module Todoable
   # Each example will be wrapped in a transaction via :db meta tag
   RSpec.describe Ledger, :db do
-    # include Rack::Test::Methods
-    # def app
-    #   Todoable::API.new
-    # end
-
     let(:ledger) { Ledger.new }
     let(:list) { { 'name' => 'Ultra Important' } }
 
@@ -63,26 +58,5 @@ module Todoable
         expect(retrieved_result.error_message).to eq('List does not exist')
       end
     end
-
-    # Update a List Name
-=begin
-    describe '#update_list' do
-      it 'updates the list name, with the requested list_id' do
-        result = ledger.record({ 'name' => 'name WILL be updated' })
-        # retrieve = ledger.retrieve(result.list_id)
-        # [{:id=>1, :name=>"name needs to be updated"}]
-
-        patch "/lists/#{result.list_id}", { 'name' => 'name SUCCESSFULLY updated' }
-        retrieve = ledger.retrieve(result.list_id)
-
-        expect(retrieve).to contain_exactly(
-          a_hash_including(
-            id: result.list_id,
-            name: 'name has been updated'
-          )
-        )
-      end
-    end
-=end
   end
 end
