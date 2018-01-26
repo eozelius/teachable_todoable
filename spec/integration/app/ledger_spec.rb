@@ -3,8 +3,14 @@ require_relative '../../../app/ledger'
 module Todoable
   # Each example will be wrapped in a transaction via :db meta tag
   RSpec.describe Ledger, :db do
+    # include Rack::Test::Methods
+
     let(:ledger) { Ledger.new }
     let(:list) { { 'name' => 'Ultra Important' } }
+
+    # def app
+    #   Todoable::API.new
+    # end
 
     # Save a new List to DB
     describe '#record' do
@@ -39,27 +45,42 @@ module Todoable
         result_3 = ledger.record({ 'name' => 'Trivial Importance' })
 
         [result_1, result_2, result_3].each do |r|
-          expect(ledger.retrieve(r.list_id)).to contain_exactly(
-            a_hash_including(id: r.list_id)
-          )
+          retrieved_result = ledger.retrieve(r.list_id) # #<struct Todoable::RecordResult :success?=true, list_id=1, name="Utmost Importance", error_message=nil>
+          expect(retrieved_result).to match(a_kind_of(Struct))
+          expect(retrieved_result[:success?]).to eq(true)
+          expect(retrieved_result[:list_id]).not_to eq(nil)
+          expect(retrieved_result[:name]).to match(a_kind_of(String))
+          expect(retrieved_result[:error_message]).to eq(nil)
         end
       end
 
-=begin
-      # this extra test would ensure that the record that is retrieved contains the correct list_id as well as name
-        [result_1, result_2, result_3].each do |r|
-          expect(ledger.retrieve(r.list_id)).to match [
-            a_hash_containing(
-              id: r.list_id,
-              name: r[:name]
-            )
-          ]
-        end
-      end
-=end
       it 'returns an empty array when there are no matching lists' do
-        expect(ledger.retrieve('-1')).to eq([])
+        retrieved_result = ledger.retrieve(-1)
+        expect(retrieved_result).to match(a_kind_of(Struct))
+        expect(retrieved_result[:list_id]).to eq(nil)
+        expect(retrieved_result[:error_message]).to eq('List does not exist')
       end
     end
+
+    # Update a List Name
+=begin
+    describe '#update_list' do
+      it 'updates the list name, with the requested list_id' do
+        result = ledger.record({ 'name' => 'name WILL be updated' })
+        # retrieve = ledger.retrieve(result.list_id)
+        # [{:id=>1, :name=>"name needs to be updated"}]
+
+        patch "/lists/#{result.list_id}", { 'name' => 'name SUCCESSFULLY updated' }
+        retrieve = ledger.retrieve(result.list_id)
+
+        expect(retrieve).to contain_exactly(
+          a_hash_including(
+            id: result.list_id,
+            name: 'name has been updated'
+          )
+        )
+      end
+    end
+=end
   end
 end

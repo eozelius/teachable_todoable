@@ -38,11 +38,12 @@ module Todoable
     end
 
     def fetch_single_record(list_id)
-      lists = DB[:lists].where(id: list_id).all
-      if lists.empty?
+      list = DB[:lists].where(id: list_id).all # example: "[{:id=>1, :name=>\"Utmost Importance\"}]"
+      if list.empty?
         RecordResult.new(false, nil, nil, 'List does not exist')
       else
-        RecordResult.new(true, list[:id], list[:name], nil)
+        record = list.first
+        RecordResult.new(true, record[:id], record[:name], nil)
       end
     end
   end

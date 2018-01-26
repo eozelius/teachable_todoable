@@ -12,6 +12,19 @@ module Todoable
     # Retrieves all lists
     get '/lists' do
       JSON.generate(DB[:lists].all)
+=begin
+      results = @ledger.retrieve
+      lists = []
+
+      results.each do |r|
+        lists.push({
+          list_id: r.list_id,
+          name: r.name,
+          error_message: r.error_message
+        })
+      end
+      JSON.generate(lists)
+=end
     end
 
     # Creates a list
@@ -33,9 +46,6 @@ module Todoable
     get '/lists/:list_id' do
       record = @ledger.retrieve(params[:list_id])
       if record.success?
-
-
-
         JSON.generate({
           list_id: record.list_id,
           name: record.name,
