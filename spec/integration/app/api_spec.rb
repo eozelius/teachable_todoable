@@ -161,8 +161,23 @@ module Todoable
           parsed = JSON.parse(last_response.body)
           expect(parsed['error_message']).to eq('Error - must provide a valid id and name')
         end
-        #it 'responds with status code 422'
-        #it 'Does NOT update the list'
+
+        it 'responds with status code 422' do
+          patch '/lists/1', JSON.generate('incorrect_name' => [])
+          expect(last_response.status).to eq(422)
+        end
+
+        it 'Does NOT update the list' do
+          patch '/lists/1', JSON.generate('incorrect_name' => [])
+          get '/lists/1'
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include({
+            'list' => {
+              'name' => 'to be updated',
+              'id' => 1
+            }
+          })
+        end
       end
     end
   end
