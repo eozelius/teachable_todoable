@@ -12,7 +12,7 @@ module Todoable
 
       DB[:lists].insert(list)
       id = DB[:lists].max(:id)
-      RecordResult.new(true, id, list[:name], nil)
+      RecordResult.new(true, id, list['name'], nil)
     end
 
     def retrieve(list_id = false)

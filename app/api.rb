@@ -11,13 +11,13 @@ module Todoable
 
     # Retrieves all lists
     get '/lists' do
-      lists = DB[:lists].all
-      JSON.generate(lists)
+      JSON.generate(DB[:lists].all)
     end
 
     # Creates a list
     post '/lists' do
       list = JSON.parse(request.body.read)
+      # todo add error checking
       result = @ledger.record(list)
 
       if result.success?
@@ -31,19 +31,23 @@ module Todoable
 
     # Retrieve a single list
     get '/lists/:list_id' do
-      result = @ledger.retrieve(params[:list_id])
+      record = @ledger.retrieve(params[:list_id])
 
-      if result.success?
-        status 201
-        JSON.generate('list_id' => result.list_id)
+      if record.success?
+        JSON.generate({
+          list_id: record.id,
+          name: record.name
+        })
       else
         status 404
-        JSON.generate('error' => result.error_message)
+        message = record.error_message || 'List does not exist'
+        JSON.generate('error' => message)
       end
     end
 
     # Updates the list
     patch '/lists/:list_id' do
+      # result = @ledger.retrieve(params[:list_id])
     end
 
     # Deletes the list and all items in it
