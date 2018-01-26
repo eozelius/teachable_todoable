@@ -10,7 +10,9 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
-      expect(parsed).to include('list_id')
+      expect(parsed).to match(a_hash_including(
+        'list' => a_hash_including('name' => a_kind_of(String))
+      ))
     end
 
     def app
@@ -26,7 +28,7 @@ module Todoable
       post_list(medium)
       post_list(trivial)
 
-      get '/lists' # {"lists"=>[{"id"=>1, "name"=>"Urgent Things"}, {"id"=>2, "name"=>"Medium Priority"}, {"id"=>3, "name"=>"Low Priority"}]}
+      get '/lists'
       expect(last_response.status).to eq(200)
       response = JSON.parse(last_response.body)
       expect(response['lists']).to include(

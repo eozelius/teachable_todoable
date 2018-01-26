@@ -4,6 +4,7 @@ module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
+    # Save a List to the DB
     def record(list)
       unless list.key?('name')
         message = 'Error name cannot be blank'
@@ -11,10 +12,15 @@ module Todoable
       end
 
       DB[:lists].insert(list)
-      id = DB[:lists].max(:id)
-      RecordResult.new(true, { 'list_id' => id }, nil)
+      response = {
+        'list' => {
+          'name' => list['name']
+        }
+      }
+      RecordResult.new(true, response, nil)
     end
 
+    # Fetch a List from the DB
     def retrieve(list_id = false)
       if list_id
         fetch_single_record(list_id)
