@@ -9,6 +9,17 @@ module Todoable
       API.new(ledger: ledger)
     end
 
+    let(:hard_coded_response) do
+      {'lists' => [
+        {
+          "name" => "Urgent Things",
+          "src" =>  "http://todoable.teachable.tech/api/lists/:list_id",
+          "id" =>  ":list_id"
+        }
+      ]}
+    end
+
+
     let(:ledger) { instance_double('Todoable::Ledger') }
 
     # Retrieve a single list
@@ -19,19 +30,13 @@ module Todoable
         before do
           allow(ledger).to receive(:retrieve)
             .with(list_id)
-            .and_return(RecordResult.new(true, 42, 'Mocked List', nil))
+            .and_return(RecordResult.new(true, hard_coded_response, nil))
         end
 
         it 'returns the list as JSON' do
           get '/lists/42'
           parsed = JSON.parse(last_response.body)
-          expect(parsed).to match(
-            a_hash_including(
-              'list_id' => 42,
-              'name' => 'Mocked List',
-              'error_messages' => nil
-            )
-          )
+          expect(parsed).to eq(hard_coded_response)
         end
 
         it 'responds with 200' do
@@ -43,27 +48,21 @@ module Todoable
       context 'when the list with given id does Not exist' do
         let(:list_id) { '-1' }
 
-        it 'returns a helpful error message' do
-          # Unfortunately this repeative allow/receive/and_return is necessary since Struct will not include falsey/nil values in response
+        before do
           allow(ledger).to receive(:retrieve)
             .with(list_id)
-            .and_return(RecordResult.new(true, nil, nil, 'List does not exist'))
+            .and_return(RecordResult.new(false, nil, 'List does not exist'))
+        end
 
+        it 'returns a helpful error message' do
           get "/lists/#{list_id}"
           parsed = JSON.parse(last_response.body)
           expect(parsed).to match(
-            a_hash_including(
-              'error_messages' => 'List does not exist',
-              'list_id' => nil
-            )
+            a_hash_including('error_message' => 'List does not exist')
           )
         end
 
         it 'responds with 404' do
-          allow(ledger).to receive(:retrieve)
-            .with(list_id)
-            .and_return(RecordResult.new(false, nil, nil, 'List does not exist'))
-
           get "/lists/#{list_id}"
           expect(last_response.status).to eq(404)
         end
@@ -74,11 +73,12 @@ module Todoable
     describe 'POST /lists' do
       context 'when the list is successfully recorded' do
         let(:list) { { 'some' => 'dummy_data' } }
+        let(:response) { { 'list_id' => 417 } }
 
         before do
           allow(ledger).to receive(:record)
             .with(list)
-            .and_return(RecordResult.new(true, 417, 'Mock List', nil))
+            .and_return(RecordResult.new(true, response, nil))
         end
 
         it 'returns the list id' do
@@ -99,13 +99,13 @@ module Todoable
         before do
           allow(ledger).to receive(:record)
             .with(invalid_list)
-            .and_return(RecordResult.new(false, nil, nil, 'Error name cannot be blank'))
+            .and_return(RecordResult.new(false, nil, 'Error name cannot be blank'))
         end
 
         it 'returns a helpful error message' do
           post '/lists', JSON.generate(invalid_list)
           parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('error' => 'Error name cannot be blank')
+          expect(parsed).to include('error_message' => 'Error name cannot be blank')
         end
         it 'responds with a 422 (Unprocessable entity)' do
           post '/lists', JSON.generate(invalid_list)

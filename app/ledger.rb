@@ -1,18 +1,18 @@
 require_relative '../config/sequel'
 
 module Todoable
-  RecordResult = Struct.new(:success?, :list_id, :name, :error_message)
+  RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
     def record(list)
       unless list.key?('name')
         message = 'Error name cannot be blank'
-        return RecordResult.new(false, nil, nil, message)
+        return RecordResult.new(false, nil, message)
       end
 
       DB[:lists].insert(list)
       id = DB[:lists].max(:id)
-      RecordResult.new(true, id, list['name'], nil)
+      RecordResult.new(true, { 'list_id' => id }, nil)
     end
 
     def retrieve(list_id = false)
@@ -26,24 +26,23 @@ module Todoable
     private
 
     def fetch_all_records
-      records = []
       lists = DB[:lists].all
 
       if lists.empty?
-        RecordResult.new(false, nil, nil, 'No lists exists')
+        RecordResult.new(false, nil, 'No lists exists')
       else
-        lists.each { |l| records.push(RecordResult.new(true, l[:id], l[:name], nil)) }
-        records
+        response = { 'lists' => lists }
+        RecordResult.new(true, response, nil)
       end
     end
 
     def fetch_single_record(list_id)
-      list = DB[:lists].where(id: list_id).all # example: "[{:id=>1, :name=>\"Utmost Importance\"}]"
-      if list.empty?
-        RecordResult.new(false, nil, nil, 'List does not exist')
+      record = DB[:lists].where(id: list_id).all # example: "[{:id=>1, :name=>\"Utmost Importance\"}]"
+      if record.empty?
+        RecordResult.new(false, nil, 'List does not exist')
       else
-        record = list.first
-        RecordResult.new(true, record[:id], record[:name], nil)
+        response = { list: record.first }
+        RecordResult.new(true, response, nil)
       end
     end
   end

@@ -10,8 +10,7 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
-      expect(parsed).to include('list_id' => a_kind_of(Integer))
-      list.merge('id' => parsed['list_id'])
+      expect(parsed).to include('list_id')
     end
 
     def app
@@ -19,14 +18,22 @@ module Todoable
     end
 
     it 'records submitted lists and retrieves them' do
-      urgent = post_list({ 'name' => 'Urgent Things' })
-      medium = post_list({ 'name' => 'Medium Priority' })
-      low =    post_list({ 'name' => 'Low Priority' })
+      urgent  = { 'name' => 'Urgent Things' }
+      medium  = { 'name' => 'Medium Priority' }
+      trivial = { 'name' => 'Low Priority' }
 
-      get '/lists'
+      post_list(urgent)
+      post_list(medium)
+      post_list(trivial)
+
+      get '/lists' # {"lists"=>[{"id"=>1, "name"=>"Urgent Things"}, {"id"=>2, "name"=>"Medium Priority"}, {"id"=>3, "name"=>"Low Priority"}]}
       expect(last_response.status).to eq(200)
-      lists = JSON.parse(last_response.body)
-      expect(lists).to contain_exactly(urgent, medium, low)
+      response = JSON.parse(last_response.body)
+      expect(response['lists']).to include(
+        {"id"=>1, "name"=>"Urgent Things"},
+        {"id"=>2, "name"=>"Medium Priority"},
+        {"id"=>3, "name"=>"Low Priority"}
+      )
     end
   end
 end
