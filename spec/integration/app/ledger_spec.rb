@@ -13,7 +13,7 @@ module Todoable
           result = ledger.record(list)
           expect(result).to be_success
           expect(DB[:lists].all).to match [a_hash_including(
-            id: result.response['list_id'],
+            id: a_kind_of(Integer),
             name: 'Ultra Important'
           )]
         end
@@ -33,22 +33,63 @@ module Todoable
 
     # Query a List from DB
     describe '#retrieve' do
-      it 'retrieves the list with the requested list_id' do
-        result_1 = ledger.record({ 'name' => 'Utmost Importance' })
-        result_2 = ledger.record({ 'name' => 'Mid Level Importance' })
-        result_3 = ledger.record({ 'name' => 'Trivial Importance' })
+      before do
+        ledger.record({ 'name' => 'Utmost Importance' })
+        ledger.record({ 'name' => 'Mid Level Importance' })
+        ledger.record({ 'name' => 'Trivial Importance' })
+      end
 
-        [result_1, result_2, result_3].each do |r|
-          retrieved_result = ledger.retrieve(r.response['list_id'])
-          # <struct Todoable::RecordResult :success?=true, response={:list=>{:id=>1, :name=>"Utmost Importance"}}, error_message=nil>
-          expect(retrieved_result).to match(a_kind_of(Todoable::RecordResult))
-          expect(retrieved_result).to be_success
+      it 'returns ONE list when a list_id is provided' do
+        # {
+        #   "list": {
+        #     "name": "Urgent Things",
+        #     "items": [
+        #       {
+        #         "name":         "Feed the cat",
+        #         "finished_at":  null,
+        #         "src":          "http://todoable.teachable.tech/api/lists/:list_id/items/:item_id",
+        #         "id":          ":item_id"
+        #       },
+        #       {
+        #         "name":        "Get cat food",
+        #         "finished_at":  null,
+        #         "src":          "http://todoable.teachable.tech/api/lists/:list_id/items/:item_id",
+        #         "id":          ":item_id"
+        #       },
+        #     ]
+        #   }, {...}
+        # }
 
-          expect(retrieved_result.response).to match(a_kind_of(Hash))
-          expect(retrieved_result.response[:list]).to match(a_kind_of(Hash))
-          expect(retrieved_result.response[:list][:id].to_i).to match(a_kind_of(Integer))
-          expect(retrieved_result.response[:list][:name]).to match(a_kind_of(String))
-        end
+        # ACTUAL
+        # {
+        #   :list => {
+        #     :id=>1,
+        #     :name=>"Utmost Importance"
+        #   }
+        # }
+
+        retrieve = ledger.retrieve('1')
+        response = retrieve.response
+
+        expect(retrieve).to match(a_kind_of(Todoable::RecordResult))
+        expect(retrieve).to be_success
+
+        expect(response).to match(a_kind_of(Hash))
+        expect(response[:list]).to match(a_kind_of(Hash))
+        expect(response.count).to eq(1)
+        expect(response[:list][:id].to_i).to match(a_kind_of(Integer))
+        expect(response[:list][:name]).to match(a_kind_of(String))
+      end
+
+      it 'retrieves ALL lists when NO list_id is provided' do
+        retrieve = ledger.retrieve
+        response = retrieve.response
+        expect(retrieve).to match(a_kind_of(Todoable::RecordResult))
+        expect(retrieve).to be_success
+
+        expect(response).to match(a_kind_of(Hash))
+        expect(response["lists"].count).to eq(3)
+
       end
 
       it 'returns an empty array when there are no matching lists' do

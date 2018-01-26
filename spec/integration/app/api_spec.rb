@@ -15,7 +15,7 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
-      expect(parsed).to include('list_id')
+      expect(parsed).to include('list')
     end
 
     let(:parsed) { JSON.parse(last_response.body) }
@@ -50,11 +50,27 @@ module Todoable
         end
 
         it 'returns all lists' do
+          # {
+          #   "lists": [
+          #     {
+          #       "name": "Urgent Things",
+          #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
+          #       "id":  ":list_id"
+          #     },
+          #     {
+          #       "name": "Shopping List",
+          #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
+          #       "id":  ":list_id"
+          #     },
+          #   ]
+          # }
+
           get '/lists'
+          expect(parsed['lists'].count).to eq(3)
           expect(parsed['lists']).to include(
-            {"id"=>1, "name"=>"Urgent Things"},
-            {"id"=>2, "name"=>"Medium Priority"},
-            {"id"=>3, "name"=>"Low Priority"}
+            { 'id' => 1, "name" => "Urgent Things" },
+            { 'id' => 2, "name" => "Medium Priority" },
+            { 'id' => 3, "name" => "Low Priority" }
           )
         end
 
@@ -70,12 +86,19 @@ module Todoable
       end
     end
 
+    # Create a list
     describe 'POST /lists' do
       context 'with valid data' do
+        # {
+        #   "list": {
+        #     "name": "Urgent Things"
+        #   }
+        # }
+
         it 'returns the list id' do
-          list = {'name' => 'important things' }
+          list = { 'name' => 'important things' }
           post_list(list)
-          expect(parsed).to include('list_id' => a_kind_of(Integer))
+          expect(parsed).to include('list' => { 'name' => 'important things' })
         end
       end
 
