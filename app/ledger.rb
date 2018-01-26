@@ -29,7 +29,7 @@ module Todoable
       lists = DB[:lists].all
 
       if lists.empty?
-        RecordResult.new(false, nil, 'No lists exists')
+        RecordResult.new(false, [], 'No lists exists')
       else
         response = { 'lists' => lists }
         RecordResult.new(true, response, nil)
@@ -39,7 +39,7 @@ module Todoable
     def fetch_single_record(list_id)
       record = DB[:lists].where(id: list_id).all # example: "[{:id=>1, :name=>\"Utmost Importance\"}]"
       if record.empty?
-        RecordResult.new(false, nil, 'List does not exist')
+        RecordResult.new(false, [], 'List does not exist')
       else
         response = { list: record.first }
         RecordResult.new(true, response, nil)

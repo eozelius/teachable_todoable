@@ -15,6 +15,7 @@ module Todoable
       if result.success?
         JSON.generate(result.response)
       else
+        status 404
         JSON.generate('error_message' => result.error_message)
       end
     end
