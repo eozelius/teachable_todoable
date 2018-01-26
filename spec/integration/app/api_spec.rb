@@ -69,5 +69,25 @@ module Todoable
         end
       end
     end
+
+    describe 'POST /lists' do
+      context 'with valid data' do
+        it 'returns the list id' do
+          list = {'name' => 'important things' }
+          post_list(list)
+          expect(parsed).to include('list_id' => a_kind_of(Integer))
+        end
+      end
+
+      context 'with Invalid data' do
+        it 'rejects the list' do
+          list = { 'this_is_invalid' => 44 }
+          post '/lists', JSON.generate(list)
+          parsed = JSON.parse(last_response.body)
+          expect(last_response.status).to eq(422)
+          expect(parsed['error_message']).to eq('Error name cannot be blank')
+        end
+      end
+    end
   end
 end

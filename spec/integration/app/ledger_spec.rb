@@ -54,7 +54,7 @@ module Todoable
       it 'returns an empty array when there are no matching lists' do
         retrieved_result = ledger.retrieve(-1)
         expect(retrieved_result).to match(a_kind_of(Todoable::RecordResult))
-        expect(retrieved_result.response).to eq(nil)
+        expect(retrieved_result.response).to eq([])
         expect(retrieved_result.error_message).to eq('List does not exist')
       end
     end
