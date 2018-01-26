@@ -75,12 +75,6 @@ module Todoable
     # Create a list
     describe 'POST /lists' do
       context 'with valid data' do
-        # {
-        #   "list": {
-        #     "name": "Urgent Things"
-        #   }
-        # }
-
         it 'returns the list name' do
           list = { 'name' => 'important things' }
           post_list(list)
@@ -124,6 +118,47 @@ module Todoable
           get '/lists/-1'
           expect(parsed["list"]).to eq(nil)
         end
+      end
+    end
+
+    # Update a list
+    describe 'PATCH /lists/:list_id' do
+      before do
+        list = { 'name' => 'to be updated' }
+        post_list(list)
+      end
+
+      context 'When request is valid (List exists & name is valid)' do
+        it 'responds with a status code 201 (OK)' do
+          patch '/lists/1', JSON.generate('name' => 'Name has been updated')
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'Updates the list' do
+          get '/lists/1'
+          parsed = JSON.parse(last_response.body)
+          expect(parsed['list']['name']).to eq('to be updated')
+          patch '/lists/1', JSON.generate('name' => 'Name has been updated')
+          get '/lists/1'
+          parsed = JSON.parse(last_response.body)
+          expect(parsed['list']['name']).to eq('Name has been updated')
+        end
+
+        it 'Returns the new list once it has been updated' do
+          patch '/lists/1', JSON.generate('name' => 'Name has been updated')
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include({
+            "list" => {
+              "name" => "Name has been updated"
+            }
+          })
+        end
+      end
+
+      context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
+        it 'returns a helpful error message'
+        #it 'responds with status code 422'
+        #it 'Does NOT update the list'
       end
     end
   end

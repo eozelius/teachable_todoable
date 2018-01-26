@@ -24,32 +24,43 @@ module Todoable
     post '/lists' do
       list = JSON.parse(request.body.read)
       # todo add error checking
-      result = @ledger.record(list)
+      record = @ledger.record(list)
 
-      if result.success?
+      if record.success?
         status 201
-        JSON.generate(result.response)
+        JSON.generate(record.response)
       else
         status 422
-        JSON.generate('error_message' => result.error_message)
+        JSON.generate('error_message' => record.error_message)
       end
     end
 
     # Retrieve a single list
     get '/lists/:list_id' do
-      result = @ledger.retrieve(params[:list_id])
-      if result.success?
-        JSON.generate(result.response)
+      retrieve = @ledger.retrieve(params[:list_id])
+      if retrieve.success?
+        JSON.generate(retrieve.response)
       else
         status 404
-        message = result.error_message || 'List does not exist'
+        message = retrieve.error_message || 'List does not exist'
         JSON.generate('error_message' => message)
       end
     end
 
     # Updates the list
     patch '/lists/:list_id' do
-      # result = @ledger.retrieve(params[:list_id])
+      new_name = JSON.parse(request.body.read)
+      list_id  = params[:list_id]
+      update = @ledger.update(list_id, new_name)
+
+      if update.success?
+        status 201
+        JSON.generate(update.response)
+      else
+        status 422
+        message = 'List does not exist'
+        JSON.generate('error_message' => message)
+      end
     end
 
     # Deletes the list and all items in it
