@@ -32,11 +32,14 @@ module Todoable
     # Retrieve a single list
     get '/lists/:list_id' do
       record = @ledger.retrieve(params[:list_id])
-
       if record.success?
+
+
+
         JSON.generate({
-          list_id: record.id,
-          name: record.name
+          list_id: record.list_id,
+          name: record.name,
+          error_messages: record.error_message
         })
       else
         status 404

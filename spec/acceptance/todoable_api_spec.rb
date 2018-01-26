@@ -21,7 +21,7 @@ module Todoable
     it 'records submitted lists and retrieves them' do
       urgent = post_list({ 'name' => 'Urgent Things' })
       medium = post_list({ 'name' => 'Medium Priority' })
-      low = post_list({ 'name' => 'Low Priority' })
+      low =    post_list({ 'name' => 'Low Priority' })
 
       get '/lists'
       expect(last_response.status).to eq(200)
