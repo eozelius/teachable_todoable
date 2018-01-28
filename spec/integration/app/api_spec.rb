@@ -14,11 +14,12 @@ module Todoable
     def post_list(list)
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
-      parsed = JSON.parse(last_response.body)
       expect(parsed).to include('list')
     end
 
-    let(:parsed) { JSON.parse(last_response.body) }
+    def parsed
+      JSON.parse(last_response.body)
+    end
 
     # Retrieves lists
     describe 'GET /lists' do
@@ -86,7 +87,6 @@ module Todoable
         it 'rejects the list' do
           list = { 'this_is_invalid' => 44 }
           post '/lists', JSON.generate(list)
-          parsed = JSON.parse(last_response.body)
           expect(last_response.status).to eq(422)
           expect(parsed['error_message']).to eq('Error name cannot be blank')
         end
@@ -100,6 +100,7 @@ module Todoable
           list = { 'name' => 'important things' }
           post_list(list)
           get 'lists/1'
+          expect(parsed).to include('list' => { 'id' => 1, 'name' => 'important things' })
         end
       end
 
@@ -136,17 +137,14 @@ module Todoable
 
         it 'Updates the list' do
           get '/lists/1'
-          parsed = JSON.parse(last_response.body)
           expect(parsed['list']['name']).to eq('to be updated')
           patch '/lists/1', JSON.generate('name' => 'Name has been updated')
           get '/lists/1'
-          parsed = JSON.parse(last_response.body)
           expect(parsed['list']['name']).to eq('Name has been updated')
         end
 
         it 'Returns the new list once it has been updated' do
           patch '/lists/1', JSON.generate('name' => 'Name has been updated')
-          parsed = JSON.parse(last_response.body)
           expect(parsed).to include({
             "list" => {
               "name" => "Name has been updated"
@@ -158,7 +156,6 @@ module Todoable
       context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
         it 'returns a helpful error message' do
           patch '/lists/1', JSON.generate('incorrect_name' => [])
-          parsed = JSON.parse(last_response.body)
           expect(parsed['error_message']).to eq('Error - must provide a valid id and name')
         end
 
@@ -170,7 +167,6 @@ module Todoable
         it 'Does NOT update the list' do
           patch '/lists/1', JSON.generate('incorrect_name' => [])
           get '/lists/1'
-          parsed = JSON.parse(last_response.body)
           expect(parsed).to include({
             'list' => {
               'name' => 'to be updated',
