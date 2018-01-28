@@ -185,22 +185,35 @@ module Todoable
 
     # Delete a list
     describe 'DELETE /lists/:list_id' do
+      before do
+        list = { 'name' => 'to be deleted' }
+        post_list(list)
+      end
+
       # context 'when user is authorized to delete list' do
         context 'when list exists' do
           it 'deletes the list and the list items' do
-            list = { 'name' => 'to be deleted' }
-            post_list(list)
             delete '/lists/1'
             get '/lists/1'
             expect(parsed["error_message"]).to eq('List does not exist')
             expect(last_response.status).to eq(404)
           end
 
-          it 'returns a status 201 (no content)'
+          it 'returns a status 201 (no content)' do
+            delete '/lists/1'
+            expect(last_response.status).to eq(201)
+          end
         end
 
         context 'when list does not exists' do
-          it 'doesn\'t delete any lists or items'
+          it "doesn't delete any lists or items" do
+            get '/lists'
+            list_count = parsed['lists'].count
+            delete '/lists/-1'
+            get '/lists'
+            new_list_count = parsed['lists'].count
+            expect(list_count).to eq(new_list_count)
+           end
         end
       # end
 
