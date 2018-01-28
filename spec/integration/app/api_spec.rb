@@ -41,11 +41,11 @@ module Todoable
       end
 
       context 'when lists exist' do
-        before do
-          urgent  = { 'name' => 'Urgent Things' }
-          medium  = { 'name' => 'Medium Priority' }
-          trivial = { 'name' => 'Low Priority' }
+        let(:urgent) { { 'name' => 'Urgent Things' } }
+        let(:medium) { { 'name' => 'Medium Priority' } }
+        let(:trivial){ { 'name' => 'Low Priority' } }
 
+        before do
           post_list(urgent)
           post_list(medium)
           post_list(trivial)
@@ -55,9 +55,9 @@ module Todoable
           get '/lists'
           expect(parsed['lists'].count).to eq(3)
           expect(parsed['lists']).to include(
-            { 'id' => 1, "name" => "Urgent Things" },
-            { 'id' => 2, "name" => "Medium Priority" },
-            { 'id' => 3, "name" => "Low Priority" }
+            a_hash_including(urgent),
+            a_hash_including(medium),
+            a_hash_including(trivial)
           )
         end
 
@@ -79,10 +79,12 @@ module Todoable
         it 'returns the ID and list name' do
           list = { 'name' => 'important things' }
           post_list(list)
-          expect(parsed).to include('list' => {
-            'name' => 'important things',
-            'id' => a_kind_of(Integer)
-          })
+          expect(parsed).to include(
+            'list' => {
+              'name' => 'important things',
+              'id' => a_kind_of(Integer)
+            }
+          )
         end
       end
 
@@ -100,13 +102,17 @@ module Todoable
     describe 'GET /lists/:list_id' do
       context 'when List exists' do
         it 'returns the list' do
+          pending 'need to implement src'
           list = { 'name' => 'important things' }
           post_list(list)
           get 'lists/1'
-          expect(parsed).to include('list' => {
-            'id' => 1,
-            'name' => 'important things'
-          })
+          expect(parsed).to include(
+            'list' => {
+              'id' => 1,
+              'name' => 'important things',
+              'src' => a_kind_of(String)
+            }
+          )
         end
       end
 
@@ -171,12 +177,14 @@ module Todoable
         end
 
         it 'Does NOT update the list' do
+          pending 'need to implement src'
           patch '/lists/1', JSON.generate('incorrect_name' => [])
           get '/lists/1'
           expect(parsed).to include({
             'list' => {
               'name' => 'to be updated',
-              'id' => 1
+              'id' => 1,
+              'src' => a_kind_of(String)
             }
           })
         end

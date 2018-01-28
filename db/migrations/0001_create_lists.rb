@@ -3,6 +3,7 @@ Sequel.migration do
     create_table :lists do
       primary_key :id
       String :name
+      String :src
     end
   end
 end

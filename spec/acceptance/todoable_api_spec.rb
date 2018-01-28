@@ -32,9 +32,9 @@ module Todoable
       expect(last_response.status).to eq(200)
       response = JSON.parse(last_response.body)
       expect(response['lists']).to include(
-        {"id"=>1, "name"=>"Urgent Things"},
-        {"id"=>2, "name"=>"Medium Priority"},
-        {"id"=>3, "name"=>"Low Priority"}
+        a_hash_including(urgent),
+        a_hash_including({ "name"=>"Medium Priority" }),
+        a_hash_including({ "name"=>"Low Priority" })
       )
     end
   end
