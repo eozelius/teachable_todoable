@@ -79,7 +79,10 @@ module Todoable
         it 'returns the list name' do
           list = { 'name' => 'important things' }
           post_list(list)
-          expect(parsed).to include('list' => { 'name' => 'important things' })
+          expect(parsed).to include('list' => {
+            'name' => 'important things',
+            'id' => a_kind_of(Integer)
+          })
         end
       end
 

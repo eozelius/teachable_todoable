@@ -12,8 +12,10 @@ module Todoable
       end
 
       DB[:lists].insert(list)
+      id = DB[:lists].max(:id)
       response = {
         'list' => {
+          'id' => id,
           'name' => list['name']
         }
       }
