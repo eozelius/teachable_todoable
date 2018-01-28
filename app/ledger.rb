@@ -31,6 +31,7 @@ module Todoable
       end
     end
 
+    # Update a List in the DB
     def update(list_id, new_name)
       # todo: this should be combined into ONE DB request to save time/resources
       list = DB[:lists].where(id: list_id).all
@@ -45,6 +46,16 @@ module Todoable
           }
         }
         RecordResult.new(true, response, nil)
+      end
+    end
+
+    def delete(list_id)
+      list = DB[:lists].where(id: list_id).all
+      if list.empty?
+        RecordResult.new(false, nil, 'List does not exist')
+      else
+        DB[:lists].where(id: list_id).delete
+        RecordResult.new(true, nil, nil)
       end
     end
 

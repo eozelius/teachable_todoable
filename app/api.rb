@@ -77,9 +77,6 @@ module Todoable
         message = delete.error_message || 'List could not be deleted'
         JSON.generate('error_message' => message)
       end
-
-      byebug
-
     end
 
     # Creates a to_do item in this list

@@ -76,7 +76,7 @@ module Todoable
     # Create a list
     describe 'POST /lists' do
       context 'with valid data' do
-        it 'returns the list name' do
+        it 'returns the ID and list name' do
           list = { 'name' => 'important things' }
           post_list(list)
           expect(parsed).to include('list' => {
@@ -103,7 +103,10 @@ module Todoable
           list = { 'name' => 'important things' }
           post_list(list)
           get 'lists/1'
-          expect(parsed).to include('list' => { 'id' => 1, 'name' => 'important things' })
+          expect(parsed).to include('list' => {
+            'id' => 1,
+            'name' => 'important things'
+          })
         end
       end
 
@@ -178,6 +181,34 @@ module Todoable
           })
         end
       end
+    end
+
+    # Delete a list
+    describe 'DELETE /lists/:list_id' do
+      # context 'when user is authorized to delete list' do
+        context 'when list exists' do
+          it 'deletes the list and the list items' do
+            list = { 'name' => 'to be deleted' }
+            post_list(list)
+            delete '/lists/1'
+            get '/lists/1'
+            expect(parsed["error_message"]).to eq('List does not exist')
+            expect(last_response.status).to eq(404)
+          end
+
+          it 'returns a status 201 (no content)'
+        end
+
+        context 'when list does not exists' do
+          it 'doesn\'t delete any lists or items'
+        end
+      # end
+
+      # context 'when user is not authorized to delete list' do
+        # it 'Does Not delete any lists'
+
+        # it 'returns a status 401 (unauthorized) and a helpful error message'
+      # end
     end
   end
 end
