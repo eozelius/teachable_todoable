@@ -31,7 +31,8 @@ module Todoable
         JSON.generate(record.response)
       else
         status 422
-        JSON.generate('error_message' => record.error_message)
+        message = record.error_message || 'List not created'
+        JSON.generate('error_message' => message)
       end
     end
 
@@ -58,13 +59,27 @@ module Todoable
         JSON.generate(update.response)
       else
         status 422
-        message = 'Error - must provide a valid id and name'
+        message = update.error_message || 'Error - must provide a valid id and name'
         JSON.generate('error_message' => message)
       end
     end
 
     # Deletes the list and all items in it
     delete '/lists/:list_id' do
+      list_id = params[:list_id]
+      delete = @ledger.delete(list_id)
+
+      if delete.success?
+        status 201
+        JSON.generate(delete.response)
+      else
+        status 422
+        message = delete.error_message || 'List could not be deleted'
+        JSON.generate('error_message' => message)
+      end
+
+      byebug
+
     end
 
     # Creates a to_do item in this list
