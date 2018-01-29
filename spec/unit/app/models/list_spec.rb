@@ -5,7 +5,7 @@ module Todoable
     it 'should have a name' do
       my_list = List.new(name: '', src: 'asdfasdf')
       expect(my_list.valid?).to eq(false)
-      my_list.name = 'my hobbies'
+      my_list.set(name: 'my hobbies') # Alternative to my_list.name.  Both methods work fine http://sequel.jeremyevans.net/rdoc/files/doc/mass_assignment_rdoc.html
       expect(my_list.valid?).to eq(true)
     end
 

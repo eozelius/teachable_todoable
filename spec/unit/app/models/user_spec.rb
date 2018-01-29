@@ -18,7 +18,7 @@ module Todoable
                       password: '',
                       token: token)
       expect(user.valid?).to eq(false)
-      user.password = 'asdfasdf'
+      user.set(password: 'asdfasdf')
       expect(user.valid?).to eq(true)
     end
 

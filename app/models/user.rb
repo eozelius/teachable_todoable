@@ -27,5 +27,10 @@ module Todoable
         errors.add(:token, 'invalid token')
       end
     end
+
+    # Call Backs
+    def before_destroy
+      self.lists.each { |l| l.destroy }
+    end
   end
 end
