@@ -11,13 +11,12 @@ module Todoable
 
     # Retrieves all lists
     get '/lists' do
-      result = @ledger.retrieve
-      if result.success?
-        JSON.generate(result.response)
-      else
-        status 404
-        JSON.generate('error_message' => result.error_message)
-      end
+      get_lists
+    end
+
+    # Retrieve a single list
+    get '/lists/:list_id' do
+      get_lists
     end
 
     # Creates a list
@@ -32,18 +31,6 @@ module Todoable
       else
         status 422
         message = record.error_message || 'List not created'
-        JSON.generate('error_message' => message)
-      end
-    end
-
-    # Retrieve a single list
-    get '/lists/:list_id' do
-      retrieve = @ledger.retrieve(params[:list_id])
-      if retrieve.success?
-        JSON.generate(retrieve.response)
-      else
-        status 404
-        message = retrieve.error_message || 'List does not exist'
         JSON.generate('error_message' => message)
       end
     end
@@ -89,6 +76,19 @@ module Todoable
 
     # Deletes the item
     delete '/lists/:list_id/items/:item_id' do
+    end
+
+    private
+
+    def get_lists
+      result = @ledger.retrieve(params[:list_id])
+      if result.success?
+        JSON.generate(result.response)
+      else
+        status 404
+        message = result.error_message || 'No lists exist'
+        JSON.generate('error_message' => message)
+      end
     end
   end
 end
