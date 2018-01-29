@@ -1,5 +1,5 @@
 require 'securerandom'
-require_relative '../../config/sequel'
+require_relative '../config/sequel'
 
 module Todoable
   class User < Sequel::Model

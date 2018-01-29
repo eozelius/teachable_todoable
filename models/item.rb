@@ -1,4 +1,4 @@
-require_relative '../../config/sequel'
+require_relative '../config/sequel'
 
 module Todoable
   class Item < Sequel::Model
