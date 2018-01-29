@@ -9,6 +9,11 @@ module Todoable
     # Attributes
     attr_accessor :name, :src
 
+    # Call Backs
+    def before_destroy
+      self.items.each { |i| i.destroy }
+    end
+
     # Validations
     def validate
       super
@@ -17,9 +22,8 @@ module Todoable
         errors.add(:name, 'invalid name')
       end
 
-      # src
-      unless @src
-        errors.add(:src, 'invalid src')
+      unless self.user_id && self.user_id > 0
+        errors.add(:user_id, 'invalid user_id')
       end
     end
   end

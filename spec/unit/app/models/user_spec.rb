@@ -4,13 +4,17 @@ module Todoable
   RSpec.describe User do
     let(:token) { SecureRandom.urlsafe_base64(nil, false) }
 
-    it 'should have an email' do
+    it 'should have a lowercase email' do
       user = User.new(email: '',
                       password: 'asdfasdf',
                       token: token)
       expect(user.valid?).to eq(false)
-      user.email = 'asdf@asdf.com'
+      user.email = 'asdf@ASDF.com'
       expect(user.valid?).to eq(true)
+
+      user.save
+
+      expect(user.email).to eq('asdf@asdf.com')
     end
 
     it 'should have a password_digest' do

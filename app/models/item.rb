@@ -16,10 +16,6 @@ module Todoable
       unless @name && @name.length >= 1
         errors.add(:name, 'invalid name')
       end
-
-      unless @src
-        errors.add(:src, 'invalid src')
-      end
     end
   end
 end

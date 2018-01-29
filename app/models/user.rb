@@ -9,6 +9,15 @@ module Todoable
     # Accessors
     attr_accessor :email, :password, :password_digest, :token
 
+    # Call Backs
+    def before_destroy
+      self.lists.each { |l| l.destroy }
+    end
+
+    def before_save
+      self.email = email.downcase
+    end
+
     # Validations
     def validate
       super
@@ -26,11 +35,6 @@ module Todoable
       unless @token && @token.length > 10
         errors.add(:token, 'invalid token')
       end
-    end
-
-    # Call Backs
-    def before_destroy
-      self.lists.each { |l| l.destroy }
     end
   end
 end
