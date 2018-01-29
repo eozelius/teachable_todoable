@@ -1,6 +1,6 @@
-require_relative '../../../models/user'
-require_relative '../../../models/list'
-require_relative '../../../models/item'
+require_relative '../../../app/models/user'
+require_relative '../../../app/models/list'
+require_relative '../../../app/models/item'
 
 module Todoable
   RSpec.describe User, :db do

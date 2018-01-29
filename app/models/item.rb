@@ -1,23 +1,22 @@
-require_relative '../config/sequel'
+require_relative '../../config/sequel'
 
 module Todoable
-  class List < Sequel::Model
+  class Item < Sequel::Model
     # SQL relationships
-    many_to_one :user
-    one_to_many :items
+    many_to_one :list
 
     # Attributes
-    attr_accessor :name, :src
+    attr_accessor :name, :finished_at, :src
 
     # Validations
     def validate
       super
+
       # name
       unless @name && @name.length >= 1
         errors.add(:name, 'invalid name')
       end
 
-      # src
       unless @src
         errors.add(:src, 'invalid src')
       end
