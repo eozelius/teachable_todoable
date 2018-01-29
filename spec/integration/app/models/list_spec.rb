@@ -1,4 +1,4 @@
-require_relative '../../../app/models/list'
+require_relative '../../../../app/models/list'
 
 module Todoable
   RSpec.describe List, :db do
