@@ -34,13 +34,13 @@ module Todoable
         end
 
         it 'returns the list as JSON' do
-          get '/lists/42'
+          get "/lists/#{list_id}"
           parsed = JSON.parse(last_response.body)
           expect(parsed).to eq(hard_coded_response)
         end
 
         it 'responds with 200' do
-          get '/lists/42'
+          get "/lists/#{list_id}"
           expect(last_response.status).to eq(200)
         end
       end

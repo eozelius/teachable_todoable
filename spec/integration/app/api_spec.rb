@@ -15,6 +15,7 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       expect(parsed).to include('list')
+      parsed['list']['id'] ? parsed['list']['id'] : false
     end
 
     def parsed
@@ -102,13 +103,13 @@ module Todoable
     describe 'GET /lists/:list_id' do
       context 'when List exists' do
         it 'returns the list' do
-          pending 'need to implement src'
+          pending 'fucking hate this shit'
           list = { 'name' => 'important things' }
-          post_list(list)
-          get 'lists/1'
+          id = post_list(list)
+          get "lists/#{id}"
           expect(parsed).to include(
             'list' => {
-              'id' => 1,
+              'id' => id,
               'name' => 'important things',
               'src' => a_kind_of(String)
             }
@@ -138,20 +139,20 @@ module Todoable
     describe 'PATCH /lists/:list_id' do
       before do
         list = { 'name' => 'to be updated' }
-        post_list(list)
+        @id = post_list(list)
       end
 
       context 'When request is valid (List exists & name is valid)' do
         it 'responds with a status code 201 (OK)' do
-          patch '/lists/1', JSON.generate('name' => 'Name has been updated')
+          patch "/lists/#{@id}", JSON.generate('name' => 'Name has been updated')
           expect(last_response.status).to eq(201)
         end
 
         it 'Updates the list' do
-          get '/lists/1'
+          get "/lists/#{@id}"
           expect(parsed['list']['name']).to eq('to be updated')
-          patch '/lists/1', JSON.generate('name' => 'Name has been updated')
-          get '/lists/1'
+          patch "/lists/#{@id}", JSON.generate('name' => 'Name has been updated')
+          get "/lists/#{@id}"
           expect(parsed['list']['name']).to eq('Name has been updated')
         end
 
@@ -167,19 +168,19 @@ module Todoable
 
       context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
         it 'returns a helpful error message' do
-          patch '/lists/1', JSON.generate('incorrect_name' => [])
+          patch "/lists/#{@id}", JSON.generate('incorrect_name' => [])
           expect(parsed['error_message']).to eq('Error - must provide a valid id and name')
         end
 
         it 'responds with status code 422' do
-          patch '/lists/1', JSON.generate('incorrect_name' => [])
+          patch "/lists/#{@id}", JSON.generate('incorrect_name' => [])
           expect(last_response.status).to eq(422)
         end
 
         it 'Does NOT update the list' do
           pending 'need to implement src'
-          patch '/lists/1', JSON.generate('incorrect_name' => [])
-          get '/lists/1'
+          patch "/lists/#{id}", JSON.generate('incorrect_name' => [])
+          get "/lists/#{id}"
           expect(parsed).to include({
             'list' => {
               'name' => 'to be updated',
@@ -195,30 +196,30 @@ module Todoable
     describe 'DELETE /lists/:list_id' do
       before do
         list = { 'name' => 'to be deleted' }
-        post_list(list)
+        @id = post_list(list)
       end
 
       # context 'when user is authorized to delete list' do
         context 'when list exists' do
           it 'deletes the list and the list items' do
-            delete '/lists/1'
-            get '/lists/1'
+            delete "/lists/#{@id}"
+            get "/lists/#{@id}"
             expect(parsed["error_message"]).to eq('List does not exist')
             expect(last_response.status).to eq(404)
           end
 
           it 'returns a status 201 (no content)' do
-            delete '/lists/1'
+            delete "/lists/#{@id}"
             expect(last_response.status).to eq(201)
           end
         end
 
         context 'when list does not exists' do
           it "doesn't delete any lists or items" do
-            get '/lists'
+            get "/lists"
             list_count = parsed['lists'].count
             delete '/lists/-1'
-            get '/lists'
+            get "/lists"
             new_list_count = parsed['lists'].count
             expect(list_count).to eq(new_list_count)
            end
