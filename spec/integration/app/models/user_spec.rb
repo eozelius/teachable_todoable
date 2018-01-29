@@ -31,6 +31,12 @@ module Todoable
         expect(lists).to include(grocery_list)
       end
 
+      it 'can update its own list' do
+        list = @user.lists.first
+        list.name = 'updated - asdf'
+        expect(@user.lists.first.name).to eq('updated - asdf')
+      end
+
       it 'will destroy associated lists when User is destroyed' do
         list_count = List.count
         @user.destroy

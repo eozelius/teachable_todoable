@@ -33,6 +33,12 @@ module Todoable
         expect(items).to include(@grapes)
       end
 
+      it 'can update its own items' do
+        item = @list.items.first
+        item.name = 'updated - asdf'
+        expect(@list.items.first.name).to eq('updated - asdf')
+      end
+
       it 'will not save an Invalid item' do
         pending 'figure out how to expect that an exception will be raised'
         rotten_tomato = Item.new(name: nil)
@@ -41,9 +47,15 @@ module Todoable
       end
 
       it 'will destroy associated items when List is destroyed' do
-        list_items = Item.count
+        items_count = Item.count
         @list.destroy
-        expect(Item.count).to eq(list_items - 1)
+        expect(Item.count).to eq(items_count - 1)
+      end
+
+      it 'will be destroyed when its user is destroyed' do
+        list_count = List.count
+        user.destroy
+        expect(List.count).to eq(list_count - 1)
       end
     end
   end

@@ -179,12 +179,12 @@ module Todoable
 
         it 'Does NOT update the list' do
           pending 'need to implement src'
-          patch "/lists/#{id}", JSON.generate('incorrect_name' => [])
-          get "/lists/#{id}"
+          patch "/lists/#{@id}", JSON.generate('incorrect_name' => [])
+          get "/lists/#{@id}"
           expect(parsed).to include({
             'list' => {
               'name' => 'to be updated',
-              'id' => 1,
+              'id' => @id,
               'src' => a_kind_of(String)
             }
           })
