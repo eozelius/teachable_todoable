@@ -1,5 +1,4 @@
 require_relative '../../../../app/models/list'
-require_relative '../../../../app/models/user'
 
 module Todoable
   RSpec.describe List do
@@ -22,10 +21,6 @@ module Todoable
       expect(list.valid?).to eq(false)
       list.src = 1
       expect(list.valid?).to eq(true)
-    end
-
-    it 'should have 0 or more items' do
-      # list.
     end
   end
 end
