@@ -1,4 +1,6 @@
 class List < Sequel::Model
+  # SQL relationships
+  many_to_one :user
   one_to_many :items
 
   # def validate
