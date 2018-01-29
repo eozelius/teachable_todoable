@@ -74,6 +74,42 @@ module Todoable
       end
     end
 
+    # Retrieve a single list
+    describe 'GET /lists/:list_id' do
+      context 'when List exists' do
+        it 'returns the list' do
+          pending 'fucking hate this shit'
+          list = { 'name' => 'important things' }
+          id = post_list(list)
+          get "lists/#{id}"
+          expect(parsed).to include(
+                              'list' => {
+                                'id' => id,
+                                'name' => 'important things',
+                                'src' => a_kind_of(String)
+                              }
+                            )
+        end
+      end
+
+      context 'when List does NOT exist' do
+        it 'returns a 404' do
+          get '/lists/-1'
+          expect(last_response.status).to eq(404)
+        end
+
+        it 'provides a helpful error message' do
+          get '/lists/-1'
+          expect(parsed["error_message"]).to eq('List does not exist')
+        end
+
+        it 'returns a nil List' do
+          get '/lists/-1'
+          expect(parsed["list"]).to eq(nil)
+        end
+      end
+    end
+
     # Create a list
     describe 'POST /lists' do
       context 'with valid data' do
@@ -95,42 +131,6 @@ module Todoable
           post '/lists', JSON.generate(list)
           expect(last_response.status).to eq(422)
           expect(parsed['error_message']).to eq('Error name cannot be blank')
-        end
-      end
-    end
-
-    # Retrieve a single list
-    describe 'GET /lists/:list_id' do
-      context 'when List exists' do
-        it 'returns the list' do
-          pending 'fucking hate this shit'
-          list = { 'name' => 'important things' }
-          id = post_list(list)
-          get "lists/#{id}"
-          expect(parsed).to include(
-            'list' => {
-              'id' => id,
-              'name' => 'important things',
-              'src' => a_kind_of(String)
-            }
-          )
-        end
-      end
-
-      context 'when List does NOT exist' do
-        it 'returns a 404' do
-          get '/lists/-1'
-          expect(last_response.status).to eq(404)
-        end
-
-        it 'provides a helpful error message' do
-          get '/lists/-1'
-          expect(parsed["error_message"]).to eq('List does not exist')
-        end
-
-        it 'returns a nil List' do
-          get '/lists/-1'
-          expect(parsed["list"]).to eq(nil)
         end
       end
     end
