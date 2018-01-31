@@ -5,7 +5,7 @@ module Todoable
 
   class Ledger
     # Save a List to the DB
-    def record(list)
+    def create_list(list)
       unless list.key?('name')
         message = 'Error name cannot be blank'
         return RecordResult.new(false, nil, message)

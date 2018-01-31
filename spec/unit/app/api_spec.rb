@@ -76,7 +76,7 @@ module Todoable
         let(:response) { { 'list_id' => 417 } }
 
         before do
-          allow(ledger).to receive(:record)
+          allow(ledger).to receive(:create_list)
             .with(list)
             .and_return(RecordResult.new(true, response, nil))
         end
@@ -97,7 +97,7 @@ module Todoable
         let(:invalid_list) { { 'list_name' => 'dummy data' } }
 
         before do
-          allow(ledger).to receive(:record)
+          allow(ledger).to receive(:create_list)
             .with(invalid_list)
             .and_return(RecordResult.new(false, nil, 'Error name cannot be blank'))
         end

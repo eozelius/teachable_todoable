@@ -23,7 +23,7 @@ module Todoable
     post '/lists' do
       list = JSON.parse(request.body.read)
       # todo add error checking
-      record = @ledger.record(list)
+      record = @ledger.create_list(list)
 
       if record.success?
         status 201
@@ -33,6 +33,14 @@ module Todoable
         message = record.error_message || 'List not created'
         JSON.generate('error_message' => message)
       end
+    end
+
+    # Create an item
+    post '/lists/:list_id/items' do
+      list_id = params[:list_id]
+      item = JSON.parse(request.body.read)
+      record = @ledger.record(item: item, list_id: list_id)
+
     end
 
     # Updates the list
