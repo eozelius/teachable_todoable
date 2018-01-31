@@ -7,7 +7,7 @@ module Todoable
     let(:list) { { 'name' => 'Ultra Important' } }
 
     # Save a new List to DB
-    describe '#record' do
+    describe '#create_list' do
       context 'with a valid list' do
         it 'successfully saves the list in the DB' do
           result = ledger.create_list(list)

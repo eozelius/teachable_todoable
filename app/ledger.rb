@@ -13,15 +13,19 @@ module Todoable
         return RecordResult.new(false, nil, message)
       end
 
-      DB[:lists].insert(list)
-      id = DB[:lists].max(:id)
-      response = {
-        'list' => {
-          'id' => id,
-          'name' => list['name']
+      new_list = List.new(name: list['name'])
+      if new_list.valid?
+        new_list.save
+        response = {
+          'list' => {
+            'id' => new_list.id,
+            'name' => new_list.name
+          }
         }
-      }
-      RecordResult.new(true, response, nil)
+        RecordResult.new(true, response, nil)
+      else
+        RecordResult.new(false, nil, 'Error list could not be created')
+      end
     end
 
     # Create an Item

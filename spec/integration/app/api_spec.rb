@@ -131,7 +131,12 @@ module Todoable
           list = { 'this_is_invalid' => 44 }
           post '/lists', JSON.generate(list)
           expect(last_response.status).to eq(422)
-          expect(parsed['error_message']).to eq('Error name cannot be blank')
+        end
+
+        it 'provides a helpful message' do
+          list = { 'name' => '' }
+          post '/lists', JSON.generate(list)
+          expect(parsed['error_message']).to eq('Error list could not be created')
         end
       end
     end
