@@ -2,12 +2,12 @@ require_relative '../../config/sequel'
 
 module Todoable
   class List < Sequel::Model
+    # Database columns
+    # :id, :name, :src, :user_id, :timestamps
+
     # SQL relationships
     many_to_one :user
     one_to_many :items
-
-    # Attributes
-    attr_accessor :name, :src
 
     # Call Backs
     def before_destroy
@@ -18,13 +18,14 @@ module Todoable
     def validate
       super
       # name
-      unless @name && @name.length >= 1
+      unless name && name.length >= 1
         errors.add(:name, 'invalid name')
       end
 
-      unless self.user_id && self.user_id > 0
-        errors.add(:user_id, 'invalid user_id')
-      end
+      # todo implement user authentication and ownership
+      # unless user_id && user_id > 0
+      #   errors.add(:user_id, 'invalid user_id')
+      # end
     end
   end
 end

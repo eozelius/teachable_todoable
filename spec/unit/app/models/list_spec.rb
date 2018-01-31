@@ -10,7 +10,8 @@ module Todoable
     end
 
     it 'should belong to a user' do
-      list = List.new(name: 'my hobbies')
+      pending 'implement user authentication and ownership'
+      list = List.new(name: 'my hobbies', user_id: nil)
       expect(list.valid?).to eq(false)
       list.user_id = 1
       expect(list.valid?).to eq(true)

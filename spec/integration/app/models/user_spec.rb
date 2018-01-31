@@ -4,14 +4,14 @@ require_relative '../../../../app/models/list'
 module Todoable
   RSpec.describe User, :db do
     describe 'SQL associations' do
-      let(:token) { SecureRandom.urlsafe_base64(nil, false) }
+      # let(:token) { SecureRandom.urlsafe_base64(nil, false) }
       let(:grocery_list) { List.new(name: 'grocery store') }
 
       before do
         @user = User.create(
           email: 'asdf@asdf.com',
-          password: 'asdfasdf',
-          token: token
+          #password: 'asdfasdf',
+          #token: token
         )
         @user.add_list(grocery_list)
       end

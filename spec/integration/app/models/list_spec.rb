@@ -5,7 +5,11 @@ require_relative '../../../../app/models/item'
 module Todoable
   RSpec.describe List, :db do
     describe 'SQL associations' do
-      let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf', token: SecureRandom.urlsafe_base64(nil, false)) }
+      let(:user) do
+        User.create(
+          email: 'asdf@asdf.com')
+          # token: SecureRandom.urlsafe_base64(nil, false))
+      end
 
       before do
         @list = List.create(
