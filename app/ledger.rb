@@ -1,10 +1,12 @@
 require_relative '../config/sequel'
+require_relative '../app/models/list'
+require_relative '../app/models/Item'
 
 module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
-    # Save a List to the DB
+    # Create a List
     def create_list(list)
       unless list.key?('name')
         message = 'Error name cannot be blank'
@@ -20,6 +22,27 @@ module Todoable
         }
       }
       RecordResult.new(true, response, nil)
+    end
+
+    # Create an Item
+    def create_item(list_id, item)
+      unless item.key?('name') && list_id
+        return RecordResult.new(false, nil, 'Error name cannot be blank')
+      end
+
+      list = List.find(list_id.to_i).first
+      new_item = Item.new(name: item['name'])
+
+      if list.exists? && new_item.valid?
+        list.add_item(new_item)
+        response = {
+          id: new_item.id,
+          name: new_item.name
+        }
+        RecordResult.new(true, response, nil)
+      else
+        RecordResult.new(false, nil, 'Error list not found')
+      end
     end
 
     # Fetch a List from the DB

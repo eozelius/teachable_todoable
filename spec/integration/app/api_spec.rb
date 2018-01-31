@@ -1,7 +1,8 @@
 require 'json'
 require 'rack/test'
 require_relative '../../../app/api'
-
+require_relative '../../../app/models/item'
+require_relative '../../../app/models/list'
 
 module Todoable
   RSpec.describe 'Todoable ENDPOINTS', :db do
@@ -132,6 +133,45 @@ module Todoable
           expect(last_response.status).to eq(422)
           expect(parsed['error_message']).to eq('Error name cannot be blank')
         end
+      end
+    end
+
+    # Create an item
+    describe 'POST /lists/:list_id/items' do
+      context 'with valid data' do
+        let(:item) { { name: 'Item 1 - have fun' } }
+
+        # create one list to add items to
+        before do
+          list = { "name" => 'List - todo' }
+          @id  = post_list(list)
+        end
+
+        it 'returns a 201 (OK) and the id' do
+          post "/lists/#{@id}/items", JSON.generate(item)
+          expect(last_response.status).to eq(201)
+          expect(parsed['id']).to match(a_kind_of(Integer))
+          # expect(parsed['name']).to eq(list)
+          expect(parsed['name']).to eq('Item 1 - have fun')
+        end
+
+        it 'creates a new item' do
+          item_count = Item.count
+          post "/lists/#{@id}/items", JSON.generate(item)
+          expect(Item.count).to eq(item_count + 1)
+        end
+
+        it 'associates the newly created item with the correct list' do
+          post "/lists/#{@id}/items", JSON.generate(item)
+          list_items = List.find(@id).first.items
+          expect(list_items.first.name).to eq(item[:name])
+        end
+      end
+
+      context 'with Invalid data' do
+        it 'returns a 422 (Unprocessible entity)'
+
+        it 'does not create any new items'
       end
     end
 
