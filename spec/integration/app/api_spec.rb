@@ -138,15 +138,16 @@ module Todoable
 
     # Create an item
     describe 'POST /lists/:list_id/items' do
+      # create one list to add items to
+      before do
+        list = { "name" => 'List - todo' }
+        @id  = post_list(list)
+      end
+
+      let(:item) { { name: 'Item 1 - have fun' } }
+      let(:invalid_list_id) { '9999999' }
+
       context 'with valid data' do
-        let(:item) { { name: 'Item 1 - have fun' } }
-
-        # create one list to add items to
-        before do
-          list = { "name" => 'List - todo' }
-          @id  = post_list(list)
-        end
-
         it 'returns a 201 (OK) and the id' do
           post "/lists/#{@id}/items", JSON.generate(item)
           expect(last_response.status).to eq(201)
@@ -169,9 +170,25 @@ module Todoable
       end
 
       context 'with Invalid data' do
-        it 'returns a 422 (Unprocessible entity)'
+        context 'Invalid list_id' do
+          it 'returns a 422 (Unprocessible entity)' do
+            post "/lists/#{invalid_list_id}/items", JSON.generate(item)
+            expect(last_response.status).to eq(422)
+          end
+        end
 
-        it 'does not create any new items'
+        context 'Invalid Item properties' do
+          it 'returns a 422 (Unprocessible entity)' do
+            post "/lists/#{@id}/items", JSON.generate(name: '')
+            expect(last_response.status).to eq(422)
+          end
+        end
+
+        it 'does not create any new items' do
+          item_count = Item.count
+          post "/lists/#{@id}/items", JSON.generate({ invalid_name_key: '' })
+          expect(Item.count).to eq(item_count)
+        end
       end
     end
 

@@ -1,6 +1,6 @@
 require_relative '../config/sequel'
 require_relative '../app/models/list'
-require_relative '../app/models/Item'
+require_relative '../app/models/item'
 
 module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
@@ -30,10 +30,9 @@ module Todoable
         return RecordResult.new(false, nil, 'Error name cannot be blank')
       end
 
-      list = List.find(list_id.to_i).first
+      list = List.find(id: list_id.to_i)
       new_item = Item.new(name: item['name'])
-
-      if list.exists? && new_item.valid?
+      if list && new_item.valid?
         list.add_item(new_item)
         response = {
           id: new_item.id,
