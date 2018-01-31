@@ -9,9 +9,7 @@ module Todoable
 
       before do
         @user = User.create(
-          email: 'asdf@asdf.com',
-          #password: 'asdfasdf',
-          #token: token
+          email: 'asdf@asdf.com'
         )
         @user.add_list(grocery_list)
       end
