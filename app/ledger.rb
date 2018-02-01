@@ -56,7 +56,7 @@ module Todoable
     end
 
     # Update a List in the DB
-    def update(list_id, new_name)
+    def update_list(list_id, new_name)
       list = List.find(id: list_id.to_i)
       return RecordResult.new(false, nil, 'Error - list does not exist') if list.nil?
       list.set(name: new_name['name'])
@@ -75,7 +75,7 @@ module Todoable
       end
     end
 
-    def delete(list_id)
+    def delete_list(list_id)
       list = DB[:lists].where(id: list_id).all
       if list.empty?
         RecordResult.new(false, nil, 'List does not exist')

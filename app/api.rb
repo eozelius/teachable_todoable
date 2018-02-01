@@ -55,13 +55,13 @@ module Todoable
     patch '/lists/:list_id' do
       new_name = JSON.parse(request.body.read)
       list_id  = params[:list_id]
-      update = @ledger.update(list_id, new_name)
-      if update.success?
+      updated_list = @ledger.update_list(list_id, new_name)
+      if updated_list.success?
         status 201
-        JSON.generate(update.response)
+        JSON.generate(updated_list.response)
       else
         status 422
-        message = update.error_message || 'Error - must provide a valid id and name'
+        message = updated_list.error_message || 'Error - must provide a valid id and name'
         JSON.generate('error_message' => message)
       end
     end
@@ -69,14 +69,14 @@ module Todoable
     # Deletes the list and all items in it
     delete '/lists/:list_id' do
       list_id = params[:list_id]
-      delete = @ledger.delete(list_id)
+      deleted_list = @ledger.delete_list(list_id)
 
-      if delete.success?
+      if deleted_list.success?
         status 201
-        JSON.generate(delete.response)
+        JSON.generate(deleted_list.response)
       else
         status 422
-        message = delete.error_message || 'List could not be deleted'
+        message = deleted_list.error_message || 'List could not be deleted'
         JSON.generate('error_message' => message)
       end
     end
