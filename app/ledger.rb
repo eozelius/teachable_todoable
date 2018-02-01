@@ -72,6 +72,20 @@ module Todoable
       end
     end
 
+    # Add an Item to a List
+    def add_list_item(list_id, item)
+      list = List.find(id: list_id.to_i)
+      return RecordResult.new(false, nil, 'Error - list does not exist') if list.nil? || item.nil?
+
+      if item.valid?
+        list.add_item(item)
+        response = list.json_response
+        RecordResult.new(true, response, nil)
+      else
+        RecordResult.new(false, nil, 'Error - item is invalid')
+      end
+    end
+
     def delete_list(list_id)
       list = List.find(id: list_id.to_i)
       if list.nil?
