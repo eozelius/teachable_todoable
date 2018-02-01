@@ -64,9 +64,9 @@ module Todoable
       if list.valid?
         list.save
         response = {
-          'list' => {
-            'id' => list.id,
-            'name' => list.name
+          list: {
+            id: list.id,
+            name: list.name
           }
         }
         RecordResult.new(true, response, nil)
