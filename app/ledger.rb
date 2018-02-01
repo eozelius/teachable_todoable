@@ -5,7 +5,7 @@ module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
-    # Fetch a List from the DB
+    # Fetch a List
     def retrieve(list_id = false)
       if list_id
         fetch_single_list(list_id)
