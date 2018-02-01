@@ -81,21 +81,6 @@ module Todoable
       end
     end
 
-    # Creates a to_do item in this list
-    post '/lists/:list_id/items' do
-      list_id = params[:list_id]
-      item = JSON.parse(request.body.read)
-      added_item = @ledger.add_list_item(list_id, item)
-      if added_item.success?
-        status 201
-      else
-        status 422
-        message = added_item.error_message || 'Item could not be added to the list'
-        JSON.generate(error_message: message)
-      end
-
-    end
-
     # Mark this to_do item as finished
     put '/lists/:list_id/items/:item_id/finish' do
     end

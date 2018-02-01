@@ -158,18 +158,17 @@ module Todoable
     describe 'POST /lists/:list_id/items' do
       # create one list to add items to
       before do
-        list = { "name" => 'List - todo' }
-        @id  = post_list(list)
+        @id = post_list({ name: 'fruits' })
       end
 
       let(:item) { { name: 'Item 1 - have fun' } }
-      let(:invalid_list_id) { '9999999' }
+      let(:invalid_list_id) { '-1' }
 
       context 'with valid data' do
         it 'returns a 201 (OK) and the id' do
           post "/lists/#{@id}/items", JSON.generate(item)
           expect(last_response.status).to eq(201)
-          expect(parsed['item']['id']).to match(a_kind_of(Integer))
+          expect(parsed['id']).to match(a_kind_of(Integer))
           # expect(parsed['name']).to eq(list)
           # expect(parsed['name']).to eq('Item 1 - have fun')
         end
@@ -187,7 +186,7 @@ module Todoable
         end
       end
 
-      context 'with Invalid data' do
+      context 'Valid request: List exists & item is valid' do
         context 'Invalid list_id' do
           it 'returns a 422 (Unprocessible entity)' do
             post "/lists/#{invalid_list_id}/items", JSON.generate(item)
@@ -195,10 +194,16 @@ module Todoable
           end
         end
 
-        context 'Invalid Item properties' do
+        context 'Invalid request: List does not exist, or item is invalid' do
           it 'returns a 422 (Unprocessible entity)' do
-            post "/lists/#{@id}/items", JSON.generate(name: '')
+            post "/lists/#{@id}/items", JSON.generate(nil)
             expect(last_response.status).to eq(422)
+            expect(parsed['error_message']).to eq('Error - item is required')
+          end
+
+          it 'returns a helpful error message' do
+            post "/lists/#{invalid_list_id}/items", JSON.generate( name: 'mangos' )
+            expect(parsed['error_message']).to eq('Error - list does not exist')
           end
         end
 
@@ -206,6 +211,16 @@ module Todoable
           item_count = Item.count
           post "/lists/#{@id}/items", JSON.generate({ invalid_name_key: '' })
           expect(Item.count).to eq(item_count)
+        end
+
+        it 'does not add the item to the list' do
+          list = List.find(id: @id)
+          list_items = list.items
+          list_items_count = list_items.count
+
+          post "/lists/#{@id}/items", JSON.generate( invalid_name: 'sandwich?' )
+          expect(list.items.count).to eq(list_items_count)
+          # expect(list.items).not_to include('sandwich')
         end
       end
     end

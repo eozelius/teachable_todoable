@@ -33,22 +33,21 @@ module Todoable
 
     # Create an Item
     def create_item(list_id, item)
-      unless item.key?('name') && list_id
-        return RecordResult.new(false, nil, 'Error name cannot be blank')
-      end
+      #unless item.key?('name') && list_id
+      #  return RecordResult.new(false, nil, 'Error name cannot be blank')
+      #end
 
       list = List.find(id: list_id.to_i)
+      return RecordResult.new(false, nil, 'Error - list does not exist') if list.nil?
+      return RecordResult.new(false, nil, 'Error - item is required') if item.nil?
+
       new_item = Item.new(name: item['name'])
       if list && new_item.valid?
         list.add_item(new_item)
-        response = {
-          item: {
-            id: new_item.id,
-          }
-        }
+        response = {id: new_item.id }
         RecordResult.new(true, response, nil)
       else
-        RecordResult.new(false, nil, 'Error list not found')
+        RecordResult.new(false, nil, 'Error item could not be added to the list')
       end
     end
 
@@ -69,20 +68,6 @@ module Todoable
         RecordResult.new(true, response, nil)
       else
         RecordResult.new(false, nil, "Error - list is not valid")
-      end
-    end
-
-    # Add an Item to a List
-    def add_list_item(list_id, item)
-      list = List.find(id: list_id.to_i)
-      return RecordResult.new(false, nil, 'Error - list does not exist') if list.nil? || item.nil?
-
-      if item.valid?
-        list.add_item(item)
-        response = list.json_response
-        RecordResult.new(true, response, nil)
-      else
-        RecordResult.new(false, nil, 'Error - item is invalid')
       end
     end
 
