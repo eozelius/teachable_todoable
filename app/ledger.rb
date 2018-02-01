@@ -1,4 +1,3 @@
-require_relative '../config/sequel'
 require_relative '../app/models/list'
 require_relative '../app/models/item'
 
@@ -17,9 +16,9 @@ module Todoable
       if new_list.valid?
         new_list.save
         response = {
-          'list' => {
-            'id' => new_list.id,
-            'name' => new_list.name
+          list: {
+            id: new_list.id,
+            name: new_list.name
           }
         }
         RecordResult.new(true, response, nil)
@@ -59,19 +58,21 @@ module Todoable
 
     # Update a List in the DB
     def update(list_id, new_name)
-      # todo: this should be combined into ONE DB request to save time/resources
-      list = DB[:lists].where(id: list_id).all
-      if list.empty? || new_name["name"].class != String || list_id.class != String
-        RecordResult.new(false, [], 'Error - must provide a valid id and name')
-      else
-        DB[:lists].where(id: list_id).update(:name => new_name["name"])
-        reloaded_name = DB[:lists].where(id: list_id).all[0][:name]
+      list = List.find(id: list_id.to_i)
+      return RecordResult.new(false, nil, 'Error - list does not exist') if list.nil?
+      list.set(name: new_name['name'])
+
+      if list.valid?
+        list.save
         response = {
           'list' => {
-            'name' => reloaded_name
+            'id' => list.id,
+            'name' => list.name
           }
         }
         RecordResult.new(true, response, nil)
+      else
+        RecordResult.new(false, nil, "Error - list is not valid")
       end
     end
 

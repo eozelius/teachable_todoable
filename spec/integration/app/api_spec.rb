@@ -222,6 +222,7 @@ module Todoable
           patch '/lists/1', JSON.generate('name' => 'Name has been updated')
           expect(parsed).to include({
             "list" => {
+              "id" => a_kind_of(Integer),
               "name" => "Name has been updated"
             }
           })
@@ -231,7 +232,7 @@ module Todoable
       context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
         it 'returns a helpful error message' do
           patch "/lists/#{@id}", JSON.generate('incorrect_name' => [])
-          expect(parsed['error_message']).to eq('Error - must provide a valid id and name')
+          expect(parsed['error_message']).to eq('Error - list is not valid')
         end
 
         it 'responds with status code 422' do
