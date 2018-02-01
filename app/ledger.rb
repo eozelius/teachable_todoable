@@ -5,6 +5,15 @@ module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
+    # Fetch a List from the DB
+    def retrieve(list_id = false)
+      if list_id
+        fetch_single_list(list_id)
+      else
+        fetch_all_records
+      end
+    end
+
     # Create a List
     def create_list(list)
       unless list.key?('name')
@@ -43,15 +52,6 @@ module Todoable
         RecordResult.new(true, response, nil)
       else
         RecordResult.new(false, nil, 'Error list not found')
-      end
-    end
-
-    # Fetch a List from the DB
-    def retrieve(list_id = false)
-      if list_id
-        fetch_single_list(list_id)
-      else
-        fetch_all_records
       end
     end
 
@@ -96,33 +96,6 @@ module Todoable
         lists.each { |l| response.push(l.json_response) }
         RecordResult.new(true, { lists: response }, nil)
       end
-
-      # get_lists
-      # {
-      #   lists: [
-      #     {
-      #       "name": "Urgent Things",
-      #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
-      #       "id":  ":list_id"
-      #     },
-      #     {
-      #       "name": "Shopping List",
-      #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
-      #       "id":  ":list_id"
-      #     },
-      #   ]
-      # }
-
-
-
-      # lists = DB[:lists].all
-      #
-      # if lists.empty?
-      #   RecordResult.new(false, [], 'No lists exists')
-      # else
-      #   response = { 'lists' => lists }
-      #   RecordResult.new(true, response, nil)
-      # end
     end
 
     def fetch_single_list(list_id)
