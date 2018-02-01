@@ -96,17 +96,16 @@ module Todoable
     describe 'GET /lists/:list_id' do
       context 'when List exists' do
         it 'returns the list' do
-          pending 'fucking hate this shit'
           list = { 'name' => 'important things' }
           id = post_list(list)
           get "lists/#{id}"
-          expect(parsed).to include(
-                              'list' => {
-                                'id' => id,
-                                'name' => 'important things',
-                                'src' => a_kind_of(String)
-                              }
-                            )
+          expect(parsed).to match(
+            'list' => {
+              'id' => id,
+              'name' => 'important things',
+              'items' => []
+            }
+          )
         end
       end
 
@@ -255,14 +254,13 @@ module Todoable
         end
 
         it 'Does NOT update the list' do
-          pending 'need to implement src'
           patch "/lists/#{@id}", JSON.generate('incorrect_name' => [])
           get "/lists/#{@id}"
           expect(parsed).to include({
             'list' => {
               'name' => 'to be updated',
               'id' => @id,
-              'src' => a_kind_of(String)
+              'items' => []
             }
           })
         end
