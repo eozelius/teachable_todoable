@@ -76,11 +76,11 @@ module Todoable
     end
 
     def delete_list(list_id)
-      list = DB[:lists].where(id: list_id).all
-      if list.empty?
-        RecordResult.new(false, nil, 'List does not exist')
+      list = List.find(id: list_id.to_i)
+      if list.nil?
+        RecordResult.new(false, nil, 'Error - list does not exist')
       else
-        DB[:lists].where(id: list_id).delete
+        list.delete
         RecordResult.new(true, nil, nil)
       end
     end
