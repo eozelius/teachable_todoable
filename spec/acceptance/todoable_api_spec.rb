@@ -10,11 +10,7 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
-      expect(parsed).to match({
-        'list' => {
-          'id' => a_kind_of(Integer)
-        }
-      })
+      expect(parsed).to match({ 'id' => a_kind_of(Integer) })
     end
 
     def app

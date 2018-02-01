@@ -24,11 +24,7 @@ module Todoable
       new_list = List.new(name: list['name'])
       if new_list.valid?
         new_list.save
-        response = {
-          list: {
-            id: new_list.id
-          }
-        }
+        response = { id: new_list.id }
         RecordResult.new(true, response, nil)
       else
         RecordResult.new(false, nil, 'Error list could not be created')
@@ -46,8 +42,9 @@ module Todoable
       if list && new_item.valid?
         list.add_item(new_item)
         response = {
-          id: new_item.id,
-          name: new_item.name
+          item: {
+            id: new_item.id,
+          }
         }
         RecordResult.new(true, response, nil)
       else

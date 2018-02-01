@@ -15,8 +15,8 @@ module Todoable
     def post_list(list)
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
-      expect(parsed).to include('list')
-      parsed['list']['id'] ? parsed['list']['id'] : false
+      expect(parsed).to include('id')
+      parsed['id'] ? parsed['id'] : false
     end
 
     def parsed
@@ -134,7 +134,7 @@ module Todoable
           list = { 'name' => 'important things' }
           post_list(list)
           expect(parsed).to match(
-            'list' => { 'id' => a_kind_of(Integer) }
+            { 'id' => a_kind_of(Integer) }
           )
         end
       end
@@ -169,9 +169,9 @@ module Todoable
         it 'returns a 201 (OK) and the id' do
           post "/lists/#{@id}/items", JSON.generate(item)
           expect(last_response.status).to eq(201)
-          expect(parsed['id']).to match(a_kind_of(Integer))
+          expect(parsed['item']['id']).to match(a_kind_of(Integer))
           # expect(parsed['name']).to eq(list)
-          expect(parsed['name']).to eq('Item 1 - have fun')
+          # expect(parsed['name']).to eq('Item 1 - have fun')
         end
 
         it 'creates a new item' do
