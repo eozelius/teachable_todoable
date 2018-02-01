@@ -23,6 +23,32 @@ module Todoable
       JSON.parse(last_response.body)
     end
 
+    def get_lists_response
+      [
+        {
+          "list" => {
+            "id" => 1,
+            "name" => "Urgent Things",
+            "items" => []
+          }
+        },
+        {
+          "list" => {
+            "id" => 2,
+            "name" => "Medium Priority",
+            "items" => []
+          }
+        },
+        {
+          "list" => {
+            "id" => 3,
+            "name" => "Low Priority",
+            "items" => []
+          }
+        }
+      ]
+    end
+
     # Retrieves lists
     describe 'GET /lists' do
       context 'when NO lists exist' do
@@ -56,21 +82,12 @@ module Todoable
         it 'returns all lists' do
           get '/lists'
           expect(parsed['lists'].count).to eq(3)
-          expect(parsed['lists']).to include(
-            a_hash_including(urgent),
-            a_hash_including(medium),
-            a_hash_including(trivial)
-          )
+          expect(parsed['lists']).to match(get_lists_response)
         end
 
         it 'Obeys correct format' do
           get '/lists'
-          expect(parsed['lists']).to include(
-            a_hash_including(
-              'id' => a_kind_of(Integer),
-              'name' => a_kind_of(String),
-            )
-          )
+          expect(parsed['lists']).to match(get_lists_response)
         end
       end
     end
@@ -117,11 +134,8 @@ module Todoable
         it 'returns the ID and list name' do
           list = { 'name' => 'important things' }
           post_list(list)
-          expect(parsed).to include(
-            'list' => {
-              'name' => 'important things',
-              'id' => a_kind_of(Integer)
-            }
+          expect(parsed).to match(
+            'list' => { 'id' => a_kind_of(Integer) }
           )
         end
       end

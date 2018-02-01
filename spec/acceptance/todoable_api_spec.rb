@@ -10,13 +10,41 @@ module Todoable
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
       parsed = JSON.parse(last_response.body)
-      expect(parsed).to match(a_hash_including(
-        'list' => a_hash_including('name' => a_kind_of(String))
-      ))
+      expect(parsed).to match({
+        'list' => {
+          'id' => a_kind_of(Integer)
+        }
+      })
     end
 
     def app
       Todoable::API.new
+    end
+
+    let(:get_lists_response) do
+      [
+        {
+          "list" => {
+            "id" => 1,
+            "name" => "Urgent Things",
+            "items" => []
+          }
+        },
+        {
+          "list" => {
+            "id" => 2,
+            "name" => "Medium Priority",
+            "items" => []
+          }
+        },
+        {
+          "list" => {
+            "id" => 3,
+            "name" => "Low Priority",
+            "items" => []
+          }
+        }
+      ]
     end
 
     it 'records submitted lists and retrieves them' do
@@ -31,11 +59,7 @@ module Todoable
       get '/lists'
       expect(last_response.status).to eq(200)
       response = JSON.parse(last_response.body)
-      expect(response['lists']).to include(
-        a_hash_including(urgent),
-        a_hash_including(medium),
-        a_hash_including(trivial)
-      )
+      expect(response['lists']).to match(get_lists_response)
     end
   end
 end

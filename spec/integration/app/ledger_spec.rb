@@ -58,9 +58,8 @@ module Todoable
         response = retrieve.response
         expect(retrieve).to match(a_kind_of(Todoable::RecordResult))
         expect(retrieve).to be_success
-
         expect(response).to match(a_kind_of(Hash))
-        expect(response["lists"].count).to eq(3)
+        expect(response[:lists].count).to eq(3)
 
       end
 

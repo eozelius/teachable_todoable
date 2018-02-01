@@ -17,8 +17,7 @@ module Todoable
         new_list.save
         response = {
           list: {
-            id: new_list.id,
-            name: new_list.name
+            id: new_list.id
           }
         }
         RecordResult.new(true, response, nil)
@@ -89,14 +88,41 @@ module Todoable
     private
 
     def fetch_all_records
-      lists = DB[:lists].all
-
+      lists = List.all
       if lists.empty?
         RecordResult.new(false, [], 'No lists exists')
       else
-        response = { 'lists' => lists }
-        RecordResult.new(true, response, nil)
+        response = []
+        lists.each { |l| response.push(l.json_response) }
+        RecordResult.new(true, { lists: response }, nil)
       end
+
+      # get_lists
+      # {
+      #   lists: [
+      #     {
+      #       "name": "Urgent Things",
+      #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
+      #       "id":  ":list_id"
+      #     },
+      #     {
+      #       "name": "Shopping List",
+      #       "src":  "http://todoable.teachable.tech/api/lists/:list_id",
+      #       "id":  ":list_id"
+      #     },
+      #   ]
+      # }
+
+
+
+      # lists = DB[:lists].all
+      #
+      # if lists.empty?
+      #   RecordResult.new(false, [], 'No lists exists')
+      # else
+      #   response = { 'lists' => lists }
+      #   RecordResult.new(true, response, nil)
+      # end
     end
 
     def fetch_single_list(list_id)
