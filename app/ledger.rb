@@ -50,7 +50,7 @@ module Todoable
     # Fetch a List from the DB
     def retrieve(list_id = false)
       if list_id
-        fetch_single_record(list_id)
+        fetch_single_list(list_id)
       else
         fetch_all_records
       end
@@ -99,12 +99,12 @@ module Todoable
       end
     end
 
-    def fetch_single_record(list_id)
-      record = DB[:lists].where(id: list_id).all # example: "[{:id=>1, :name=>\"Utmost Importance\"}]"
-      if record.empty?
+    def fetch_single_list(list_id)
+      list = List.find(id: list_id.to_i)
+      if list.nil?
         RecordResult.new(false, [], 'List does not exist')
       else
-        response = { list: record.first }
+        response = list.json_response
         RecordResult.new(true, response, nil)
       end
     end
