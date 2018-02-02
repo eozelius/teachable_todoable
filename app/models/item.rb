@@ -8,6 +8,11 @@ module Todoable
     # SQL relationships
     many_to_one :list
 
+    # Callbacks
+    def after_create
+      self.src = "http://todoable.teachable.tech/api/lists/#{self.id}"
+    end
+
     # Validations
     def validate
       super

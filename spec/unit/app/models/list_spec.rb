@@ -2,6 +2,8 @@ require_relative '../../../../app/models/list'
 
 module Todoable
   RSpec.describe List do
+    let(:src) { 'http://todoable.teachable.tech/api/lists/1' }
+
     it 'should have a name' do
       my_list = List.new(name: '', user_id: 1)
       expect(my_list.valid?).to eq(false)

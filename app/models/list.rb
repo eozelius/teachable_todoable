@@ -14,6 +14,10 @@ module Todoable
       self.items.each { |i| i.destroy }
     end
 
+    def after_create
+      self.src = "http://todoable.teachable.tech/api/lists/#{self.id}"
+    end
+
     # Validations
     def validate
       super

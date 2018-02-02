@@ -14,7 +14,8 @@ module Todoable
       before do
         @list = List.create(
           name: 'fruits and vegetables',
-          user_id: 1
+          user_id: 1,
+          src: 'http://todoable.teachable.tech/api/lists/1'
         )
         @grapes = Item.create(name: 'grapes')
         @list.add_item(@grapes)
@@ -22,6 +23,8 @@ module Todoable
       end
 
       it 'has a "many_to_one" relationship with :user' do
+
+
         expect(@list.user_id).to eq(user.id)
         expect(user.lists).to include(@list)
       end
@@ -60,6 +63,14 @@ module Todoable
         list_count = List.count
         user.destroy
         expect(List.count).to eq(list_count - 1)
+      end
+
+      it 'will automatically create a src attr after creation' do
+        list = List.new(name: 'my list', user_id: 1)
+        expect(list.valid?).to eq(true)
+        expect(list.src).to eq(nil)
+        list.save
+        expect(list.src).not_to eq(nil)
       end
     end
   end

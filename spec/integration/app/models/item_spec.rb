@@ -35,6 +35,14 @@ module Todoable
         @list.destroy
         expect(Item.count).to eq(items_count - 1)
       end
+
+      it 'will automatically create a src attr after creation' do
+        item = Item.new(name: 'my item', list_id: 1)
+        expect(item.valid?).to eq(true)
+        expect(item.src).to eq(nil)
+        item.save
+        expect(item.src).not_to eq(nil)
+      end
     end
   end
 end
