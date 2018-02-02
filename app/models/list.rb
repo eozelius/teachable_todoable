@@ -31,9 +31,9 @@ module Todoable
     def json_response
       {
         list: {
-          id: self.id,
-          name: self.name,
-          items: self.items
+          id: id,
+          name: name,
+          items: items.map { |i| i.json_response }
         }
       }
     end
