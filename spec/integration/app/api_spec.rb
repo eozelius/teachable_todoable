@@ -285,7 +285,6 @@ module Todoable
     # Update an item - mark it finished
     describe 'PUT /lists/:list_id/items/:item_id/finish' do
       before do
-        # @list_id = post_list(name: 'books')
         @list = List.create(name: 'books')
         @item = @list.add_item(name: 'fiction')
         @finished_item = @list.add_item(name: 'biographies', finished_at: DateTime.now)
@@ -357,9 +356,9 @@ module Todoable
             expect(last_response.status).to eq(404)
           end
 
-          it 'returns a status 201 (no content)' do
+          it 'returns a status 204 (no content)' do
             delete "/lists/#{@id}"
-            expect(last_response.status).to eq(201)
+            expect(last_response.status).to eq(204)
           end
         end
 
@@ -371,7 +370,12 @@ module Todoable
             get "/lists"
             new_list_count = parsed['lists'].count
             expect(list_count).to eq(new_list_count)
-           end
+          end
+
+          it 'returns a 422 (Unprocessable entity)' do
+            delete '/lists/-1'
+            expect(last_response.status).to eq(422)
+          end
         end
       # end
 
@@ -380,6 +384,56 @@ module Todoable
 
         # it 'returns a status 401 (unauthorized) and a helpful error message'
       # end
+    end
+
+    # Delete a list
+    describe 'DELETE /list/:list_id/:item_id' do
+      before do
+        @list = List.create(name: 'books')
+        @item = @list.add_item(name: 'fiction')
+        @finished_item = @list.add_item(name: 'biographies', finished_at: DateTime.now)
+      end
+
+      context 'Valid request: List exists & Item exists' do
+        it 'Deletes an item' do
+          list_items_count = @list.items.count
+          delete "/lists/#{@list.id}/items/#{@item.id}"
+          @list.reload
+          expect(@list.items.count).to eq(list_items_count - 1)
+        end
+
+        it 'deleted the correct item' do
+          delete "/lists/#{@list.id}/items/#{@item.id}"
+          expect(@list.items).not_to include(@item)
+          expect(@list.items).to include(@finished_item)
+        end
+
+        it 'returns a 204 (no content)' do
+          delete "/lists/#{@list.id}/items/#{@item.id}"
+          expect(last_response.status).to eq(204)
+        end
+      end
+
+      context 'Invalid request: List or Item do not exist' do
+        let(:invalid_item_id) { '-1' }
+        let(:invalid_list_id) { '-1' }
+
+        it 'returns a 422 (Unprocessable entity)' do
+          delete "/lists/#{invalid_list_id}/items/#{@item.id}"
+          expect(last_response.status).to eq(422)
+        end
+
+        it 'does not delete any items' do
+          item_count = Item.count
+          delete "/lists/#{@list.id}/items/#{invalid_item_id}"
+          expect(Item.count).to eq(item_count)
+        end
+
+        it 'returns a helpful error message' do
+          delete "/lists/#{@list.id}/items/#{invalid_item_id}"
+          expect(parsed['error_message']).to eq('Error - Item could not be deleted')
+        end
+      end
     end
   end
 end

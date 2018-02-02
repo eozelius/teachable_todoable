@@ -99,6 +99,19 @@ module Todoable
       end
     end
 
+    def delete_item(list_id, item_id)
+      list = List.find(id: list_id)
+      item = Item.find(id: item_id)
+
+      if list.nil? || item.nil?
+        RecordResult.new(false, nil, 'Error - Item could not be deleted')
+      else
+        item.delete
+        list.save
+        RecordResult.new(true, nil, nil)
+      end
+    end
+
     private
 
     def fetch_all_records

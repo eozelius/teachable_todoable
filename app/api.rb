@@ -72,7 +72,7 @@ module Todoable
       deleted_list = @ledger.delete_list(list_id)
 
       if deleted_list.success?
-        status 201
+        status 204
         JSON.generate(deleted_list.response)
       else
         status 422
@@ -98,6 +98,17 @@ module Todoable
 
     # Deletes the item
     delete '/lists/:list_id/items/:item_id' do
+      list_id = params[:list_id]
+      item_id = params[:item_id]
+      deleted_item = @ledger.delete_item(list_id, item_id)
+
+      if deleted_item.success?
+        status 204
+      else
+        status 422
+        message = deleted_item.error_message || 'Item could not be deleted'
+        JSON.generate('error_message' => message)
+      end
     end
 
     private
