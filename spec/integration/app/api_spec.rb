@@ -282,6 +282,65 @@ module Todoable
       end
     end
 
+    # Update an item - mark it finished
+    describe 'PUT /lists/:list_id/items/:item_id/finish' do
+      before do
+        # @list_id = post_list(name: 'books')
+        @list = List.create(name: 'books')
+        @item = @list.add_item(name: 'fiction')
+        @finished_item = @list.add_item(name: 'biographies', finished_at: DateTime.now)
+      end
+
+      context 'Valid request: (List & item exist)' do
+        it 'returns a 201' do
+          put "/lists/#{@list.id}/items/#{@item.id}/finish"
+          expect(last_response.status).to eq(200)
+        end
+
+        context 'when @item.finished_at == nil' do
+          it 'marks the item as finished' do
+            put "/lists/#{@list.id}/items/#{@item.id}/finish"
+            get "/lists/#{@list.id}"
+            first_item = parsed["list"]["items"].first
+            expect(first_item["finished_at"]).not_to eq(nil)
+          end
+        end
+
+        context 'when @item.finished_at == DateTime' do
+          it 'marks the item as unfinished' do
+            put "/lists/#{@list.id}/items/#{@finished_item.id}/finish"
+            get "/lists/#{@list.id}"
+            first_item = parsed["list"]["items"].last
+            expect(first_item["finished_at"]).to eq(nil) # todo
+          end
+        end
+      end
+
+      context 'Invalid request: (List or Item does not exist)' do
+        let(:invalid_list_id) { '-1' }
+        let(:invalid_item_id) { '-1' }
+
+        it 'will not mark a list item as finished' do
+          put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
+          get "/lists/#{@list.id}"
+          first_item = parsed['list']['items'].first
+          expect(first_item['finished_at']).to eq(nil)
+        end
+
+        it 'returns a 422(Unprocessable entity)' do
+          put "/lists/#{invalid_list_id}/items/1/finish"
+          expect(last_response.status).to eq(422)
+          put "/lists/1/items/#{invalid_item_id}/finish"
+          expect(last_response.status).to eq(422)
+        end
+
+        it 'returns a helpful error message' do
+          put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
+          expect(parsed['error_message']).to eq('Error - Item does not exist')
+        end
+      end
+    end
+
     # Delete a list
     describe 'DELETE /lists/:list_id' do
       before do

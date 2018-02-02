@@ -71,6 +71,24 @@ module Todoable
       end
     end
 
+    # Update an Item - toggle complete field
+    def finish_item(list_id, item_id)
+      list = List.find(id: list_id)
+      item = Item.find(id: item_id)
+
+      if list.nil? || item.nil?
+        return RecordResult.new(false, nil, 'Error - Item does not exist')
+      end
+
+      if item.finished_at.nil?
+        item.set(finished_at: DateTime.now)
+      else
+        item.set(finished_at: nil)
+      end
+      item.save
+      RecordResult.new(true, item.finished_at, nil)
+    end
+
     def delete_list(list_id)
       list = List.find(id: list_id.to_i)
       if list.nil?

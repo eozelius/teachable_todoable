@@ -83,6 +83,17 @@ module Todoable
 
     # Mark this to_do item as finished
     put '/lists/:list_id/items/:item_id/finish' do
+      list_id = params[:list_id]
+      item_id = params[:item_id]
+      finished_item = @ledger.finish_item(list_id, item_id)
+
+      if finished_item.success?
+        JSON.generate(finished_item.response)
+      else
+        status 422
+        message = finished_item.error_message || 'Item could not be finished'
+        JSON.generate('error_message' => message)
+      end
     end
 
     # Deletes the item

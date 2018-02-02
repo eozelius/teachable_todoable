@@ -19,31 +19,9 @@ module Todoable
     end
 
     def json_response
-      {
-        id: id,
+      { id: id,
         name: name,
-        finished_at: finished_at,
-      }
-      #
-      # {
-      #   "list": {
-      #     "name": "Urgent Things",
-      #     "items": [
-      #       {
-      #         "name":         "Feed the cat",
-      #         "finished_at":  null,
-      #         "src":          "http://todoable.teachable.tech/api/lists/:list_id/items/:item_id",
-      #         "id":          ":item_id"
-      #       },
-      #       {
-      #         "name":        "Get cat food",
-      #         "finished_at":  null,
-      #         "src":          "http://todoable.teachable.tech/api/lists/:list_id/items/:item_id",
-      #         "id":          ":item_id"
-      #       },
-      #     ]
-      #   }
-      # }
+        finished_at: finished_at }
     end
   end
 end
