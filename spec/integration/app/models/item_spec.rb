@@ -4,9 +4,6 @@ require_relative '../../../../app/models/list'
 module Todoable
   RSpec.describe Item, :db do
     describe 'SQL associations' do
-      # let(:list) { List.create(name: 'sports', user_id: 1) }
-      # let(:item) { Item.create(name: 'hockey', list_id: list.id) }
-
       before do
         @list = List.create(name: 'sports', user_id: 1)
         @item = Item.new(name: 'hockey')
