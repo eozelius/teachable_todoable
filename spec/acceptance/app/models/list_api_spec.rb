@@ -1,7 +1,6 @@
 require 'rack/test'
 require_relative '../../../../app/api'
 require_relative '../../../../app/models/list'
-require_relative '../../../../app/models/item'
 
 module Todoable
   RSpec.describe 'List API endpoints', :db do
