@@ -1,12 +1,38 @@
 require 'sinatra/base'
 require 'json'
+require 'base64'
 require_relative 'ledger'
+require_relative 'models/user'
 
 module Todoable
   class API < Sinatra::Base
     def initialize(ledger: Ledger.new)
       @ledger = ledger
       super()
+    end
+
+    post '/authenticate' do
+      if @env['HTTP_AUTHORIZATION'].nil?
+        status 401
+        JSON.generate(error_message: 'please log in')
+      end
+
+      user_pass = parse_basic_auth
+      user = User.find(email: user_pass[:email])
+
+      if user.nil?
+        user = @ledger.create_user(user_pass)
+        if user.success?
+          status 201
+          JSON.generate(user.response)
+        else
+          status 422
+          message = user.error_message || 'user is not valid'
+          JSON.generate(error_message: message)
+        end
+      else
+        # log in user
+      end
     end
 
     # Retrieves all lists
@@ -21,16 +47,16 @@ module Todoable
 
     # Creates a list
     post '/lists' do
-      list = JSON.parse(request.body.read)
+      params = JSON.parse(request.body.read)
       # todo add error checking
-      record = @ledger.create_list(list)
+      list = @ledger.create_list(params)
 
-      if record.success?
+      if list.success?
         status 201
-        JSON.generate(record.response)
+        JSON.generate(list.response)
       else
         status 422
-        message = record.error_message || 'List not created'
+        message = list.error_message || 'List not created'
         JSON.generate('error_message' => message)
       end
     end
@@ -112,6 +138,14 @@ module Todoable
     end
 
     private
+
+    def parse_basic_auth
+      digest = @env['HTTP_AUTHORIZATION'].split(' ')[1]
+      email_pass = Base64.decode64(digest).split(':')
+      email = email_pass.first
+      password = email_pass.last
+      { email: email, password: password }
+    end
 
     def get_lists
       result = @ledger.retrieve(params[:list_id])

@@ -5,6 +5,22 @@ module Todoable
   RecordResult = Struct.new(:success?, :response, :error_message)
 
   class Ledger
+    # Create a User
+    def create_user(user_params)
+      user = User.new(email: user_params[:email], password: user_params[:password])
+      if user.valid?
+        user.save
+        response = {
+          id: user.id,
+          token: user.token
+        }
+        RecordResult.new(true, response, nil)
+      else
+        #error_message = user.errors || 'user could not be created'
+        RecordResult.new(false, nil, 'user could not be created')
+      end
+    end
+
     # Fetch a List
     def retrieve(list_id = false)
       if list_id

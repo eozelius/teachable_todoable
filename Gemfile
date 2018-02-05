@@ -12,3 +12,4 @@ gem 'byebug', '~> 9.0', '>= 9.0.6'
 gem 'sequel', '~> 5.4'
 gem 'sqlite3', '~> 1.3', '>= 1.3.13'
 gem 'simplecov', '~> 0.15.1', :require => false, :group => :test
+gem 'bcrypt', '~> 3.1', '>= 3.1.11'

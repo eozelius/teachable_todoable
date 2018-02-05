@@ -1,5 +1,6 @@
-require 'securerandom'
+require 'bcrypt'
 require_relative '../../config/sequel'
+
 
 module Todoable
   class User < Sequel::Model
@@ -8,6 +9,25 @@ module Todoable
 
     # SQL relationships
     one_to_many :lists
+
+    # Authentication
+    include BCrypt
+    attr_accessor :token
+
+    def password
+      @password ||= Password.new('asdfasdf')
+    end
+
+    def password=(new_password)
+      @password = Password.create(new_password)
+      self.password_digest = @password
+    end
+
+    def generate_token!
+      self.token_digest = SecureRandom.urlsafe_base64(64)
+      self.save #persist
+      self.token
+    end
 
     # Call Backs
     def before_destroy
@@ -38,3 +58,4 @@ module Todoable
     end
   end
 end
+
