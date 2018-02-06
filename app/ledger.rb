@@ -8,11 +8,12 @@ module Todoable
     # Create a User
     def create_user(user_params)
       user = User.new(email: user_params[:email], password: user_params[:password])
+
       if user.valid?
         user.save
         response = {
           id: user.id,
-          token: user.token
+          token: user.generate_token!
         }
         RecordResult.new(true, response, nil)
       else

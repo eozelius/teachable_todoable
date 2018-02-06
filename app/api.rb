@@ -14,7 +14,7 @@ module Todoable
     post '/authenticate' do
       if @env['HTTP_AUTHORIZATION'].nil?
         status 401
-        JSON.generate(error_message: 'please log in')
+        return JSON.generate(error_message: 'please log in')
       end
 
       user_pass = parse_basic_auth
@@ -24,11 +24,11 @@ module Todoable
         user = @ledger.create_user(user_pass)
         if user.success?
           status 201
-          JSON.generate(user.response)
+          return JSON.generate(user.response)
         else
           status 422
           message = user.error_message || 'user is not valid'
-          JSON.generate(error_message: message)
+          return JSON.generate(error_message: message)
         end
       else
         # log in user

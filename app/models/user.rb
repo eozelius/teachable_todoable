@@ -24,8 +24,8 @@ module Todoable
     end
 
     def generate_token!
-      self.token_digest = SecureRandom.urlsafe_base64(64)
-      self.save #persist
+      self.token = SecureRandom.urlsafe_base64(64)
+      self.save
       self.token
     end
 
