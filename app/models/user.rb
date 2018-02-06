@@ -15,7 +15,7 @@ module Todoable
     attr_accessor :token
 
     def password
-      @password ||= Password.new('asdfasdf')
+      @password ||= Password.new(password_digest)
     end
 
     def password=(new_password)

@@ -23,16 +23,43 @@ module Todoable
 
     describe 'Authentication' do
       context 'user already exists' do
+        let(:password) { 'asdfasdf' }
+        let(:user) { User.create(email: 'user@example.com', password: password) }
+
         context 'valid request: email:password present and correct' do
-          it 'generates a new token'
-          it 'returns a 200'
+          before do
+            auth_header = create_auth_header(user.email, password)
+            header 'Authorization', auth_header
+          end
+
+          it 'generates a new token' do
+            old_token = user.generate_token!
+            post '/authenticate'
+            expect(old_token).not_to eq(parsed[:token])
+          end
+
+          it 'returns a 201' do
+            post '/authenticate'
+            expect(last_response.status).to eq(201)
+          end
         end
 
         context 'invalid request: email:password missing or incorrect' do
           it 'returns a helpful error message' do
-
+            auth_header = create_auth_header(user.email, '')
+            header 'Authorization', auth_header
+            post '/authenticate'
+            expect(last_response.status).to eq(422)
+            expect(parsed[:error_message]).to eq('invalid email:password combination')
           end
-          it 'does not generate a new token'
+
+          it 'does not generate a new token' do
+            old_token = user.generate_token!
+            auth_header = create_auth_header(user.email, 6)
+            header 'Authorization', auth_header
+            post '/authenticate'
+            expect(old_token).to eq(user.token)
+          end
         end
       end
 

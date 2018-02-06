@@ -21,6 +21,7 @@ module Todoable
       user = User.find(email: user_pass[:email])
 
       if user.nil?
+        # attempt to  create new user
         user = @ledger.create_user(user_pass)
         if user.success?
           status 201
@@ -31,7 +32,17 @@ module Todoable
           return JSON.generate(error_message: message)
         end
       else
-        # log in user
+
+        # attempt to authenticate user
+        if user.password == user_pass[:password]
+          status 201
+          token = user.generate_token!
+          return JSON.generate(token: token)
+        else
+          status 422
+          message = 'invalid email:password combination'
+          return JSON.generate(error_message: message)
+        end
       end
     end
 
@@ -140,8 +151,9 @@ module Todoable
     private
 
     def parse_basic_auth
-      digest = @env['HTTP_AUTHORIZATION'].split(' ')[1]
-      email_pass = Base64.decode64(digest).split(':')
+      auth_header = @env['HTTP_AUTHORIZATION'] # "Basic <long encrypted string representing email:password>"
+      email_pass_digest = auth_header[6, 999]   # "<long encrypted string representing email:password>"
+      email_pass = Base64.decode64(email_pass_digest).split(':') # [ 'asdf@example.com', 'asdfasdf' ]
       email = email_pass.first
       password = email_pass.last
       { email: email, password: password }
