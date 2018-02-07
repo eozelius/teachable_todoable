@@ -25,21 +25,21 @@ module Todoable
         {
           list: {
             id: 1,
-            name: "Urgent Things",
+            name: 'Urgent Things',
             items: []
           }
         },
         {
           list: {
             id: 2,
-            name: "Medium Priority",
+            name: 'Medium Priority',
             items: []
           }
         },
         {
           list: {
             id: 3,
-            name: "Low Priority",
+            name: 'Low Priority',
             items: []
           }
         }
