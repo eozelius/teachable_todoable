@@ -14,12 +14,12 @@ module Todoable
     def post_list(list)
       post '/lists', JSON.generate(list)
       expect(last_response.status).to eq(201)
-      expect(parsed).to include('id')
-      parsed['id'] ? parsed['id'] : false
+      expect(parsed).to include(:id)
+      parsed[:id] ? parsed[:id] : false
     end
 
     def parsed
-      JSON.parse(last_response.body)
+      JSON.parse(last_response.body, { symbolize_names: true })
     end
 
     # Create an item
@@ -36,9 +36,7 @@ module Todoable
         it 'returns a 201 (OK) and the id' do
           post "/lists/#{@id}/items", JSON.generate(item)
           expect(last_response.status).to eq(201)
-          expect(parsed['id']).to match(a_kind_of(Integer))
-          # expect(parsed['name']).to eq(list)
-          # expect(parsed['name']).to eq('Item 1 - have fun')
+          expect(parsed[:id]).to match(a_kind_of(Integer))
         end
 
         it 'creates a new item' do
@@ -66,12 +64,12 @@ module Todoable
           it 'returns a 422 (Unprocessible entity)' do
             post "/lists/#{@id}/items", JSON.generate(nil)
             expect(last_response.status).to eq(422)
-            expect(parsed['error_message']).to eq('Error - item is required')
+            expect(parsed[:error_message]).to eq('Error - item is required')
           end
 
           it 'returns a helpful error message' do
             post "/lists/#{invalid_list_id}/items", JSON.generate( name: 'mangos' )
-            expect(parsed['error_message']).to eq('Error - list does not exist')
+            expect(parsed[:error_message]).to eq('Error - list does not exist')
           end
         end
 
@@ -111,8 +109,8 @@ module Todoable
           it 'marks the item as finished' do
             put "/lists/#{@list.id}/items/#{@item.id}/finish"
             get "/lists/#{@list.id}"
-            first_item = parsed["list"]["items"].first
-            expect(first_item["finished_at"]).not_to eq(nil)
+            first_item = parsed[:list][:items].first
+            expect(first_item[:finished_at]).not_to eq(nil)
           end
         end
 
@@ -120,8 +118,8 @@ module Todoable
           it 'marks the item as unfinished' do
             put "/lists/#{@list.id}/items/#{@finished_item.id}/finish"
             get "/lists/#{@list.id}"
-            first_item = parsed["list"]["items"].last
-            expect(first_item["finished_at"]).to eq(nil) # todo
+            first_item = parsed[:list][:items].last
+            expect(first_item[:finished_at]).to eq(nil)
           end
         end
       end
@@ -133,7 +131,7 @@ module Todoable
         it 'will not mark a list item as finished' do
           put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
           get "/lists/#{@list.id}"
-          first_item = parsed['list']['items'].first
+          first_item = parsed[:list][:items].first
           expect(first_item['finished_at']).to eq(nil)
         end
 
@@ -146,7 +144,7 @@ module Todoable
 
         it 'returns a helpful error message' do
           put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
-          expect(parsed['error_message']).to eq('Error - Item does not exist')
+          expect(parsed[:error_message]).to eq('Error - Item does not exist')
         end
       end
     end
@@ -196,7 +194,7 @@ module Todoable
 
         it 'returns a helpful error message' do
           delete "/lists/#{@list.id}/items/#{invalid_item_id}"
-          expect(parsed['error_message']).to eq('Error - Item could not be deleted')
+          expect(parsed[:error_message]).to eq('Error - Item could not be deleted')
         end
       end
     end
