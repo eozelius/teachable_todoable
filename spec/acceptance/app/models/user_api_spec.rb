@@ -12,10 +12,6 @@ module Todoable
       Todoable::API.new
     end
 
-    def parsed
-      JSON.parse(last_response.body, { symbolize_names: true })
-    end
-
     def create_auth_header(email, password)
       user_pass_digest = Base64.encode64("#{email}:#{password}")
       "Basic #{user_pass_digest}"
@@ -35,7 +31,7 @@ module Todoable
           it 'generates a new token' do
             old_token = user.generate_token!
             post '/authenticate'
-            expect(old_token).not_to eq(parsed[:token])
+            expect(old_token).not_to eq(parsed_response[:token])
           end
 
           it 'returns a 201' do
@@ -50,7 +46,7 @@ module Todoable
             header 'Authorization', auth_header
             post '/authenticate'
             expect(last_response.status).to eq(422)
-            expect(parsed[:error_message]).to eq('invalid email:password combination')
+            expect(parsed_response[:error_message]).to eq('invalid email:password combination')
           end
 
           it 'does not generate a new token' do
@@ -86,7 +82,7 @@ module Todoable
 
           it 'returns a new token' do
             post '/authenticate'
-            expect(parsed[:token]).not_to eq(nil)
+            expect(parsed_response[:token]).not_to eq(nil)
           end
         end
 
@@ -97,7 +93,7 @@ module Todoable
           it 'returns a 401 when NO header is sent' do
             post '/authenticate'
             expect(last_response.status).to eq(401)
-            expect(parsed[:error_message]).not_to eq(nil)
+            expect(parsed_response[:error_message]).not_to eq(nil)
           end
 
           it 'returns a 422 (unprocessable entity)' do
@@ -111,7 +107,7 @@ module Todoable
             auth_header = create_auth_header(non_existent_email, nil)
             header 'Authorization', auth_header
             post '/authenticate'
-            expect(parsed[:error_message]).to eq('user could not be created')
+            expect(parsed_response[:error_message]).to eq('user could not be created')
           end
 
           it 'does not create a user' do
@@ -126,7 +122,7 @@ module Todoable
             auth_header = create_auth_header(non_existent_email, invalid_password)
             header 'Authorization', auth_header
             post '/authenticate'
-            expect(parsed[:token]).to eq(nil)
+            expect(parsed_response[:token]).to eq(nil)
           end
         end
       end

@@ -7,10 +7,6 @@ module Todoable
   RSpec.describe 'Todoable API', :db do
     include Rack::Test::Methods
 
-    def parsed
-      JSON.parse(last_response.body, { symbolize_names: true })
-    end
-
     def app
       Todoable::API.new
     end
@@ -52,7 +48,7 @@ module Todoable
 
       get '/lists'
       expect(last_response.status).to eq(200)
-      expect(parsed[:lists]).to match(get_lists_response)
+      expect(parsed_response[:lists]).to match(get_lists_response)
     end
   end
 end

@@ -10,10 +10,6 @@ module Todoable
       Todoable::API.new
     end
 
-    def parsed
-      JSON.parse(last_response.body, { symbolize_names: true })
-    end
-
     let(:get_lists_response) do
       [
         {
@@ -45,7 +41,7 @@ module Todoable
       context 'when NO lists exist' do
         it 'returns []' do
           get '/lists'
-          expect(parsed['lists']).to eq(nil)
+          expect(parsed_response[:lists]).to eq(nil)
         end
 
         it 'sends a status 404' do
@@ -55,7 +51,7 @@ module Todoable
 
         it 'informs user no lists exist' do
           get '/lists'
-          expect(parsed[:error_message]).to eq('No lists exists')
+          expect(parsed_response[:error_message]).to eq('No lists exists')
         end
       end
 
@@ -72,13 +68,13 @@ module Todoable
 
         it 'returns all lists' do
           get '/lists'
-          expect(parsed[:lists].count).to eq(3)
-          expect(parsed[:lists]).to match(get_lists_response)
+          expect(parsed_response[:lists].count).to eq(3)
+          expect(parsed_response[:lists]).to match(get_lists_response)
         end
 
         it 'Obeys correct format' do
           get '/lists'
-          expect(parsed[:lists]).to match(get_lists_response)
+          expect(parsed_response[:lists]).to match(get_lists_response)
         end
       end
     end
@@ -90,7 +86,7 @@ module Todoable
           list = { name: 'important things' }
           id = create_list(list)
           get "lists/#{id}"
-          expect(parsed).to match(
+          expect(parsed_response).to match(
             list: {
               id: id,
               name: 'important things',
@@ -108,12 +104,12 @@ module Todoable
 
         it 'provides a helpful error message' do
           get '/lists/-1'
-          expect(parsed[:error_message]).to eq('List does not exist')
+          expect(parsed_response[:error_message]).to eq('List does not exist')
         end
 
         it 'returns a nil List' do
           get '/lists/-1'
-          expect(parsed[:list]).to eq(nil)
+          expect(parsed_response[:list]).to eq(nil)
         end
       end
     end
@@ -124,7 +120,7 @@ module Todoable
         it 'returns the ID and list name' do
           list = { name: 'important things' }
           create_list(list)
-          expect(parsed).to match( { id: a_kind_of(Integer) })
+          expect(parsed_response).to match( { id: a_kind_of(Integer) })
         end
       end
 
@@ -138,7 +134,7 @@ module Todoable
         it 'provides a helpful message' do
           list = { name: '' }
           post '/lists', JSON.generate(list)
-          expect(parsed[:error_message]).to eq('Error list could not be created')
+          expect(parsed_response[:error_message]).to eq('Error list could not be created')
         end
       end
     end
@@ -158,15 +154,15 @@ module Todoable
 
         it 'Updates the list' do
           get "/lists/#{@id}"
-          expect(parsed[:list][:name]).to eq('to be updated')
+          expect(parsed_response[:list][:name]).to eq('to be updated')
           patch "/lists/#{@id}", JSON.generate(name: 'Name has been updated')
           get "/lists/#{@id}"
-          expect(parsed[:list][:name]).to eq('Name has been updated')
+          expect(parsed_response[:list][:name]).to eq('Name has been updated')
         end
 
         it 'Returns the new list once it has been updated' do
           patch '/lists/1', JSON.generate(name: 'Name has been updated')
-          expect(parsed).to include({
+          expect(parsed_response).to include({
             list: {
               id: a_kind_of(Integer),
               name: 'Name has been updated'
@@ -178,7 +174,7 @@ module Todoable
       context 'When request is Invalid (List doesnt exist, or name/items are invalid)' do
         it 'returns a helpful error message' do
           patch "/lists/#{@id}", JSON.generate(incorrect_name: [])
-          expect(parsed[:error_message]).to eq('Error - list is not valid')
+          expect(parsed_response[:error_message]).to eq('Error - list is not valid')
         end
 
         it 'responds with status code 422' do
@@ -189,7 +185,7 @@ module Todoable
         it 'Does NOT update the list' do
           patch "/lists/#{@id}", JSON.generate(incorrect_name: [])
           get "/lists/#{@id}"
-          expect(parsed).to include({
+          expect(parsed_response).to include({
             list: {
               name: 'to be updated',
               id: @id,
@@ -211,7 +207,7 @@ module Todoable
         it 'deletes the list and the list items' do
           delete "/lists/#{@id}"
           get "/lists/#{@id}"
-          expect(parsed[:error_message]).to eq('List does not exist')
+          expect(parsed_response[:error_message]).to eq('List does not exist')
           expect(last_response.status).to eq(404)
         end
 
@@ -224,10 +220,10 @@ module Todoable
       context 'when list does not exists' do
         it "doesn't delete any lists or items" do
           get "/lists"
-          list_count = parsed[:lists].count
+          list_count = parsed_response[:lists].count
           delete '/lists/-1'
           get "/lists"
-          new_list_count = parsed[:lists].count
+          new_list_count = parsed_response[:lists].count
           expect(list_count).to eq(new_list_count)
         end
 

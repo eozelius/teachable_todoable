@@ -10,10 +10,6 @@ module Todoable
       API.new(ledger: ledger)
     end
 
-    def parsed
-      JSON.parse(last_response.body, { symbolize_names:true })
-    end
-
     let(:hard_coded_response) do
       {lists: [
         {
@@ -37,7 +33,7 @@ module Todoable
 
         it 'returns the list as JSON' do
           get "/lists/#{list_id}"
-          expect(parsed).to eq(hard_coded_response)
+          expect(parsed_response).to eq(hard_coded_response)
         end
 
         it 'responds with 200' do
@@ -57,7 +53,7 @@ module Todoable
 
         it 'returns a helpful error message' do
           get "/lists/#{list_id}"
-          expect(parsed).to match(
+          expect(parsed_response).to match(
             a_hash_including(error_message: 'List does not exist')
           )
         end
@@ -83,7 +79,7 @@ module Todoable
 
         it 'returns the list id' do
           post '/lists', JSON.generate(list)
-          expect(parsed).to include(list_id: 417)
+          expect(parsed_response).to include(list_id: 417)
         end
 
         it 'responds with a 201 (OK)' do
@@ -103,7 +99,7 @@ module Todoable
 
         it 'returns a helpful error message' do
           post '/lists', JSON.generate(invalid_list)
-          expect(parsed).to include(error_message: 'Error name cannot be blank')
+          expect(parsed_response).to include(error_message: 'Error name cannot be blank')
         end
         it 'responds with a 422 (Unprocessable entity)' do
           post '/lists', JSON.generate(invalid_list)

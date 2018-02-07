@@ -10,6 +10,7 @@ require "bundler/setup"
 require "todoable"
 require 'byebug'
 require 'pp'
+require_relative '../spec/support/helper_methods'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
