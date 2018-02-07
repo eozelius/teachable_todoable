@@ -1,6 +1,7 @@
 require 'rack/test'
 require 'json'
 require_relative '../../app/api'
+require_relative '../../spec/support/helper_methods'
 
 module Todoable
   RSpec.describe 'Todoable API', :db do
@@ -8,12 +9,6 @@ module Todoable
 
     def parsed
       JSON.parse(last_response.body, { symbolize_names: true })
-    end
-
-    def post_list(list)
-      post '/lists', JSON.generate(list)
-      expect(last_response.status).to eq(201)
-      expect(parsed).to match({ id: a_kind_of(Integer) })
     end
 
     def app
@@ -51,9 +46,9 @@ module Todoable
       medium  = { name: 'Medium Priority' }
       trivial = { name: 'Low Priority' }
 
-      post_list(urgent)
-      post_list(medium)
-      post_list(trivial)
+      create_list(urgent)
+      create_list(medium)
+      create_list(trivial)
 
       get '/lists'
       expect(last_response.status).to eq(200)

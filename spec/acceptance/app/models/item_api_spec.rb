@@ -11,13 +11,6 @@ module Todoable
       Todoable::API.new
     end
 
-    def post_list(list)
-      post '/lists', JSON.generate(list)
-      expect(last_response.status).to eq(201)
-      expect(parsed).to include(:id)
-      parsed[:id] ? parsed[:id] : false
-    end
-
     def parsed
       JSON.parse(last_response.body, { symbolize_names: true })
     end
@@ -26,7 +19,7 @@ module Todoable
     describe 'POST /lists/:list_id/items' do
       # create one list to add items to
       before do
-        @id = post_list({ name: 'fruits' })
+        @id = create_list({ name: 'fruits' })
       end
 
       let(:item) { { name: 'Item 1 - have fun' } }

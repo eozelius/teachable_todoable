@@ -10,13 +10,6 @@ module Todoable
       Todoable::API.new
     end
 
-    def post_list(list)
-      post '/lists', JSON.generate(list)
-      expect(last_response.status).to eq(201)
-      expect(parsed).to include(:id)
-      parsed[:id] ? parsed[:id] : false
-    end
-
     def parsed
       JSON.parse(last_response.body, { symbolize_names: true })
     end
@@ -72,9 +65,9 @@ module Todoable
         let(:trivial){ { name: 'Low Priority' } }
 
         before do
-          post_list(urgent)
-          post_list(medium)
-          post_list(trivial)
+          create_list(urgent)
+          create_list(medium)
+          create_list(trivial)
         end
 
         it 'returns all lists' do
@@ -95,7 +88,7 @@ module Todoable
       context 'when List exists' do
         it 'returns the list' do
           list = { name: 'important things' }
-          id = post_list(list)
+          id = create_list(list)
           get "lists/#{id}"
           expect(parsed).to match(
             list: {
@@ -130,7 +123,7 @@ module Todoable
       context 'with valid data' do
         it 'returns the ID and list name' do
           list = { name: 'important things' }
-          post_list(list)
+          create_list(list)
           expect(parsed).to match( { id: a_kind_of(Integer) })
         end
       end
@@ -154,7 +147,7 @@ module Todoable
     describe 'PATCH /lists/:list_id' do
       before do
         list = { name: 'to be updated' }
-        @id = post_list(list)
+        @id = create_list(list)
       end
 
       context 'When request is valid (List exists & name is valid)' do
@@ -211,7 +204,7 @@ module Todoable
     describe 'DELETE /lists/:list_id' do
       before do
         list = { name: 'to be deleted' }
-        @id = post_list(list)
+        @id = create_list(list)
       end
 
       context 'when list exists' do
