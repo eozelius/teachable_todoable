@@ -8,9 +8,7 @@ module Todoable
       let(:grocery_list) { List.new(name: 'grocery store') }
 
       before do
-        @user = User.create(
-          email: 'asdf@asdf.com'
-        )
+        @user = User.create(email: 'asdf@asdf.com')
         @user.add_list(grocery_list)
       end
 

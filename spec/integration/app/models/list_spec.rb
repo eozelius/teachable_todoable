@@ -6,9 +6,7 @@ module Todoable
   RSpec.describe List, :db do
     describe 'SQL associations' do
       let(:user) do
-        User.create(
-          email: 'asdf@asdf.com')
-          # token: SecureRandom.urlsafe_base64(nil, false))
+        User.create(email: 'asdf@asdf.com')
       end
 
       before do
@@ -23,8 +21,6 @@ module Todoable
       end
 
       it 'has a "many_to_one" relationship with :user' do
-
-
         expect(@list.user_id).to eq(user.id)
         expect(user.lists).to include(@list)
       end

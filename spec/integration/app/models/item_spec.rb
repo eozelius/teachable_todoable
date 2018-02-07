@@ -8,7 +8,6 @@ module Todoable
         @list = List.create(name: 'sports', user_id: 1)
         @item = Item.new(name: 'hockey')
         @list.add_item(@item)
-        # list.add_item(@item)
       end
 
       it 'has a "many_to_one" relationship with :list' do
