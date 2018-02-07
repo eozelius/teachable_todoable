@@ -2,8 +2,6 @@ require_relative '../../../../app/models/user'
 
 module Todoable
   RSpec.describe User do
-    # let(:token) { SecureRandom.urlsafe_base64(nil, false) }
-
     describe 'email' do
       it 'should be present' do
         user = User.new(email: '')
