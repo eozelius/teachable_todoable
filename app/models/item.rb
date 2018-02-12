@@ -21,6 +21,10 @@ module Todoable
       unless name && name.length >= 1
         errors.add(:name, 'invalid name')
       end
+
+      unless list_id
+        errors.add(:list_id, 'list_id is required')
+      end
     end
 
     def json_response
