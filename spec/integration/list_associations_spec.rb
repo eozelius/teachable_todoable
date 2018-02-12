@@ -1,5 +1,6 @@
 require_relative '../../app/models/user'
 require_relative '../../app/models/list'
+require_relative '../../app/models/item'
 
 module Todoable
   RSpec.describe 'List SQL associations', :db do
