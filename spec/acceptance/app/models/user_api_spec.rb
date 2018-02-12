@@ -92,7 +92,7 @@ module Todoable
 
           it 'returns a 422 when NO header is sent' do
             post '/authenticate'
-            expect(last_response.status).to eq(422)
+            expect(last_response.status).to eq(401)
             expect(parsed_response[:error_message]).not_to eq(nil)
           end
 

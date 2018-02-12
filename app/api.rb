@@ -16,8 +16,7 @@ module Todoable
     post '/authenticate' do
       email_password = parse_email_password
       if !email_password
-        status 422
-        return JSON.generate(error_message: 'Invalid email/password format')
+        halt 422, JSON.generate(error_message: 'Invalid email/password format')
       end
 
       token = @ledger.generate_token(email_password[:email], email_password[:password])
@@ -63,8 +62,7 @@ module Todoable
     post '/lists/:list_id/items' do
       item = JSON.parse(request.body.read, { symbolize_names: true })
       if item.nil?
-        status 422
-        return JSON.generate(error_message: 'Item name is required')
+        halt 422, JSON.generate(error_message: 'Item name is required')
       end
 
       created_item = @ledger.create_item(params[:list_id], @token, item)
@@ -136,22 +134,6 @@ module Todoable
 
     private
 
-    def parse_email_password
-      return false if @env['HTTP_AUTHORIZATION'].nil?
-
-      begin
-        auth_header = @env['HTTP_AUTHORIZATION'] # "Basic <long encrypted string representing email:password>"
-        email_pass_digest = auth_header.split(' ')[1]  # "<long encrypted string representing email:password>"
-        email_pass = Base64.decode64(email_pass_digest).split(':') # [ 'asdf@example.com', 'asdfasdf' ]
-        email = email_pass.first
-        password = email_pass.last
-        { email: email, password: password }
-      rescue Exception => e
-        p "error: => #{e}"
-        false
-      end
-    end
-
     def get_lists(token, list_id = nil)
       result = @ledger.retrieve(token, list_id)
       if result.success?
@@ -163,8 +145,30 @@ module Todoable
       end
     end
 
+    def parse_email_password
+      if @env['HTTP_AUTHORIZATION'].nil?
+        halt 401, JSON.generate(error_message: 'Invalid email/password')
+      end
+
+      begin
+        auth_header = @env['HTTP_AUTHORIZATION'] # "Basic <long encrypted string representing email:password>"
+        email_pass_digest = auth_header.split(' ')[1]  # "<long encrypted string representing email:password>"
+        email_pass = Base64.decode64(email_pass_digest).split(':') # [ 'asdf@example.com', 'asdfasdf' ]
+        email = email_pass.first
+        password = email_pass.last
+        { email: email, password: password }
+      rescue Exception => e
+        halt 422, JSON.generate(error_message: 'Invalid email/password')
+      end
+    end
+
     def parse_token
-      return false if @env['HTTP_AUTHORIZATION'].nil? || request.path_info == '/authenticate'
+      return false if request.path_info == '/authenticate'
+
+      if @env['HTTP_AUTHORIZATION'].nil?
+        halt 401, JSON.generate(error_message: 'Token required')
+      end
+
       begin
         token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
         @token = Base64.decode64(token_digest)
