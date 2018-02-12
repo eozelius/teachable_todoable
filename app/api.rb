@@ -15,10 +15,6 @@ module Todoable
 
     post '/authenticate' do
       email_password = parse_email_password
-      if !email_password
-        halt 422, JSON.generate(error_message: 'Invalid email/password format')
-      end
-
       token = @ledger.generate_token(email_password[:email], email_password[:password])
       if token.success?
         status 201
@@ -43,8 +39,7 @@ module Todoable
     post '/lists' do
       list_params = JSON.parse(request.body.read, { symbolize_names: true })
       if list_params.nil?
-        status 422
-        return JSON.generate(error_message: 'List name is required')
+        halt 422, JSON.generate(error_message: 'List name is required')
       end
 
       created_list = @ledger.create_list(@token, list_params)
@@ -80,8 +75,7 @@ module Todoable
     patch '/lists/:list_id' do
       new_list = JSON.parse(request.body.read, { symbolize_names: true })
       if new_list.nil?
-        status 422
-        return JSON.generate(error_message: 'List name is required')
+        halt 422, JSON.generate(error_message: 'List name is required')
       end
 
       updated_list = @ledger.update_list(params[:list_id], @token, new_list)
@@ -157,7 +151,7 @@ module Todoable
         email = email_pass.first
         password = email_pass.last
         { email: email, password: password }
-      rescue Exception => e
+      rescue Exception
         halt 422, JSON.generate(error_message: 'Invalid email/password')
       end
     end
@@ -172,7 +166,7 @@ module Todoable
       begin
         token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
         @token = Base64.decode64(token_digest)
-      rescue Exception => e
+      rescue Exception
         halt 401, JSON.generate(error_message: 'Invalid Token')
       end
     end
