@@ -2,7 +2,7 @@ require 'base64'
 
 def create_auth_header(email, password)
   user_pass_digest = Base64.encode64("#{email}:#{password}")
-  "Basic #{user_pass_digest}"
+  header 'Authorization', "Basic #{user_pass_digest}"
 end
 
 def create_token_header(token)
@@ -19,5 +19,6 @@ def create_list(list, token)
 end
 
 def parsed_response
+  return '' if last_response.body == ''
 	JSON.parse(last_response.body, { symbolize_names: true })
 end

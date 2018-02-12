@@ -1,0 +1,123 @@
+#### testing schema ####
+
+1. API
+	a. routes
+		post '/authenticate'
+		get '/lists'
+		get '/lists:list_id'
+		post '/lists'
+		post '/lists/:list_id/items'
+		patch '/lists/:list_id'
+		delete '/lists/:list_id'
+		put '/lists/:list_id/items/:item_id/finish'
+		delete '/lists/:list_id/items/:item_id'
+
+2. Ledger
+	a. methods
+		create_user(email, password)
+		generate_token(email, password)
+		retrieve(token, list_id)
+		create_list(token, list)
+		create_item(list_id, token, item)
+		update_list(list_id, token, new_list)
+		finish_item(list_id, token, item_id)
+		delete_list(list_id, token)
+
+3. User
+	a. attr validations
+		email (downcased automatically)
+		password
+		token (expires after 20 minutes)
+
+	b. SQL relationships
+		one_to_many :lists
+
+	c. methods & callbacks
+		generate_token!	
+		before_destroy
+		before_save
+		after_create
+
+	d. API endpoints
+		post '/authenticate'
+
+4. List
+	a. attr validations
+		name
+		user_id
+		src
+
+	b. SQL relationships
+		one_to_many :items
+		many_to_one :user
+
+	c. methods & callbacks
+		json_response -> retrieves items
+		before_destroy
+		after_create
+
+	d. API endpoints
+		get '/lists'
+		get '/lists:list_id'
+		post '/lists'
+		patch '/lists/:list_id'
+		delete '/lists/:list_id'
+
+5. Item
+	a. attr validations
+		name
+		list_id
+		src
+
+	b. SQL relationships
+		many_to_one :list
+
+	c. methods & callbases
+		json_response
+		after_create
+
+6. Token auth
+	
+
+7. email:password auth
+
+8. private methods
+	fetch_all_records
+	fetch_single_record
+	parse_email_password
+	parse_token
+	get_lists
+
+#### end testing schema ####
+
+#### curl commands ####
+# Authenticate!!
+curl -u ethan@gmail.com:asdfasdf -H "Accept: application/json" -H "Content-Type: applicatio
+n/json" -X POST http://localhost:9292/authenticate -w "\n"
+    {"id":5,"token":"0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw"}
+
+# Get Lists
+curl -H "Authorization: Token token=\"0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw\"" -H "Accept: application/json" -w "\n" -H "Content-Type: application/json" http://localhost:9292/lists
+    {
+    	"lists":[
+    		{
+    			"list":{
+    				"id":1,
+    				"name":"things to bake",
+    				"items":[]
+    			}
+    		},
+    		{
+    			"list":{
+    				"id":2,
+    				"name":"movies",
+    				"items":[]
+    			}
+    		}
+    	]
+    }
+
+
+curl --data '{"name": "things to bake"}' -H "Authorization: Token token=\"0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw\"" -H "Accept: application/json" -H "Content-Type: application/json" http://localhost:9292/lists -w "\n"
+
+#### end curl commands ####
