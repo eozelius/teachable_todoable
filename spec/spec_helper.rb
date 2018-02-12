@@ -6,8 +6,10 @@ if ENV['RACK_ENV'] == 'test'
   puts "required simplecov"
 end
 
-require "bundler/setup"
-require "todoable"
+require 'factory_bot'
+require 'support/factory_bot'
+require 'bundler/setup'
+require 'todoable'
 require 'byebug'
 require 'pp'
 require_relative '../spec/support/helper_methods'
@@ -27,6 +29,8 @@ RSpec.configure do |config|
   config.when_first_matching_example_defined(:db) do
     require_relative 'support/db'
   end
+
+  config.default_formatter= 'progress'
 
   # config.profile_examples = 5
   config.order = :random

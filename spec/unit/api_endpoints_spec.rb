@@ -13,9 +13,9 @@ module Todoable
       {
         lists: [
           {
-            name: "Urgent Things",
-            src:  "http://todoable.teachable.tech/api/lists/1",
-            id:  "1"
+            name: 'Urgent Things',
+            src:  'http://todoable.teachable.tech/api/lists/1',
+            id:  '1'
           }
         ]
       }
@@ -28,7 +28,7 @@ module Todoable
     before { create_token_header(token) }
 
     describe 'post /authenticate' do
-      before { basic_auth_header = create_auth_header(email, password) }
+      before { create_auth_header(email, password) }
 
       it 'returns a user id and token' do
         allow(ledger).to receive(:generate_token)
@@ -56,7 +56,7 @@ module Todoable
         allow(ledger).to receive(:retrieve)
           .with(token, '1')
           .and_return(RecordResult.new(true, get_list_response, nil))
-        get "/lists/1"
+        get '/lists/1'
         expect(parsed_response).to eq(get_list_response)
       end
     end
