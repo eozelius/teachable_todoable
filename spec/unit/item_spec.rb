@@ -1,4 +1,4 @@
-require_relative '../../../app/models/item'
+require_relative '../../app/models/item'
 
 module Todoable
   RSpec.describe Item do
