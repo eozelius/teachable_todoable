@@ -1,6 +1,5 @@
 require_relative '../../../app/models/list'
 
-
 module Todoable
   RSpec.describe List do
     let(:src) { 'http://todoable.teachable.tech/api/lists/1' }
@@ -36,6 +35,25 @@ module Todoable
             :id=>1,
             :name=>"my hobbies",
             :items=>[]
+          }
+        })
+      end
+
+      it 'returns its Items in JSON format', :db do
+        list = List.create(name: 'my hobbies', user_id: 1)
+        list.add_item(name: 'cooking')
+        json_list = list.json_response
+        expect(json_list).to eq({
+          :list => {
+            :id=>1,
+            :name=>"my hobbies",
+            :items=>[
+              {
+                :id=>1,
+                :name=>"cooking",
+                :finished_at=>nil
+              }
+            ]
           }
         })
       end
