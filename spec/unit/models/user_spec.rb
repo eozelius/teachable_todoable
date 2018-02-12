@@ -37,10 +37,7 @@ module Todoable
 
     describe 'callbacks' do
       it 'should generate a token after', :db do
-        user = User.new(email: 'asdf@asdf.com',
-                        password: 'asdfasdf')
-        expect(user.token).to eq(nil)
-        user.save
+        user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
         expect(user.token).not_to eq(nil)
       end
     end

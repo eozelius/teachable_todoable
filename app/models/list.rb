@@ -1,4 +1,5 @@
 require_relative '../../config/sequel'
+require_relative '../../app/models/item'
 
 module Todoable
   class List < Sequel::Model
@@ -36,7 +37,7 @@ module Todoable
         list: {
           id: id,
           name: name,
-          items: items.map { |i| i.json_response }
+          items: self.items.map { |i| i.json_response }
         }
       }
     end
