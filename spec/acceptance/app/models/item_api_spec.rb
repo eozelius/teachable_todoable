@@ -11,11 +11,17 @@ module Todoable
       Todoable::API.new
     end
 
+    let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf') }
+
+    before do
+      create_token_header(user.token)
+    end
+
     # Create an item
     describe 'POST /lists/:list_id/items' do
       # create one list to add items to
       before do
-        @id = create_list({ name: 'fruits' })
+        @id = create_list({ name: 'fruits' }, user.token)
       end
 
       let(:item) { { name: 'Item 1 - have fun' } }
@@ -53,12 +59,12 @@ module Todoable
           it 'returns a 422 (Unprocessible entity)' do
             post "/lists/#{@id}/items", JSON.generate(nil)
             expect(last_response.status).to eq(422)
-            expect(parsed_response[:error_message]).to eq('Error - item is required')
+            expect(parsed_response[:error_message]).to eq('Item name is required')
           end
 
           it 'returns a helpful error message' do
             post "/lists/#{invalid_list_id}/items", JSON.generate( name: 'mangos' )
-            expect(parsed_response[:error_message]).to eq('Error - list does not exist')
+            expect(parsed_response[:error_message]).to eq('List does not exist')
           end
         end
 
@@ -83,7 +89,7 @@ module Todoable
     # Update an item - mark it finished
     describe 'PUT /lists/:list_id/items/:item_id/finish' do
       before do
-        @list = List.create(name: 'books')
+        @list = List.create(name: 'books', user_id: user.id)
         @item = @list.add_item(name: 'fiction')
         @finished_item = @list.add_item(name: 'biographies', finished_at: DateTime.now)
       end
@@ -97,6 +103,7 @@ module Todoable
         context 'when @item.finished_at == nil' do
           it 'marks the item as finished' do
             put "/lists/#{@list.id}/items/#{@item.id}/finish"
+            create_token_header(user.token)
             get "/lists/#{@list.id}"
             first_item = parsed_response[:list][:items].first
             expect(first_item[:finished_at]).not_to eq(nil)
@@ -106,6 +113,7 @@ module Todoable
         context 'when @item.finished_at == DateTime' do
           it 'marks the item as unfinished' do
             put "/lists/#{@list.id}/items/#{@finished_item.id}/finish"
+            create_token_header(user.token)
             get "/lists/#{@list.id}"
             first_item = parsed_response[:list][:items].last
             expect(first_item[:finished_at]).to eq(nil)
@@ -119,6 +127,7 @@ module Todoable
 
         it 'will not mark a list item as finished' do
           put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
+          create_token_header(user.token)
           get "/lists/#{@list.id}"
           first_item = parsed_response[:list][:items].first
           expect(first_item['finished_at']).to eq(nil)
@@ -127,13 +136,14 @@ module Todoable
         it 'returns a 422(Unprocessable entity)' do
           put "/lists/#{invalid_list_id}/items/1/finish"
           expect(last_response.status).to eq(422)
+          create_token_header(user.token)
           put "/lists/1/items/#{invalid_item_id}/finish"
           expect(last_response.status).to eq(422)
         end
 
         it 'returns a helpful error message' do
           put "/lists/#{@list.id}/items/#{invalid_item_id}/finish"
-          expect(parsed_response[:error_message]).to eq('Error - Item does not exist')
+          expect(parsed_response[:error_message]).to eq('Item does not exist')
         end
       end
     end
@@ -141,7 +151,7 @@ module Todoable
     # Delete an Item
     describe 'DELETE /list/:list_id/:item_id' do
       before do
-        @list = List.create(name: 'books')
+        @list = List.create(name: 'books', user_id: user.id)
         @item = @list.add_item(name: 'fiction')
         @finished_item = @list.add_item(name: 'biographies', finished_at: DateTime.now)
       end
@@ -183,7 +193,7 @@ module Todoable
 
         it 'returns a helpful error message' do
           delete "/lists/#{@list.id}/items/#{invalid_item_id}"
-          expect(parsed_response[:error_message]).to eq('Error - Item could not be deleted')
+          expect(parsed_response[:error_message]).to eq('Item does not exist')
         end
       end
     end

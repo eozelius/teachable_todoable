@@ -26,10 +26,9 @@ module Todoable
         errors.add(:name, 'invalid name')
       end
 
-      # todo implement user authentication and ownership
-      # unless user_id && user_id > 0
-      #   errors.add(:user_id, 'invalid user_id')
-      # end
+      unless user_id && user_id > 0
+        errors.add(:user_id, 'invalid user_id')
+      end
     end
 
     def json_response

@@ -1,47 +1,47 @@
 require_relative '../../../../app/models/user'
 
 module Todoable
-  RSpec.describe User do
+  RSpec.describe User, :db do
     describe 'email' do
       it 'should be present' do
-        user = User.new(email: '')
+        user = User.new(email: '',
+                        password: 'asdfasdf')
         expect(user.valid?).to eq(false)
         user.email = 'asdf@ASDF.com'
+        user.save
         expect(user.valid?).to eq(true)
       end
 
       it 'should be unique', :db do
         asdf_email = 'asdf@asdf.com'
-        user = User.new(email: asdf_email)
+        user = User.new(email: asdf_email,
+                        password: 'asdfasdf')
         user.save
-        user_2 = User.new(email: asdf_email)
+        user_2 = User.new(email: asdf_email,
+                          password: 'asdfasdf')
         expect(user_2.valid?).to eq(true)
       end
 
       it 'should automatically downcase the email', :db do
-        user = User.new(email: 'ASDF@ASDF.COM')
+        user = User.new(email: 'ASDF@ASDF.COM',
+                        password: 'asdfasdf')
         user.save
         expect(user.email).to eq('asdf@asdf.com')
       end
 
       it 'should have a password_digest' do
-        pending 'need to implement password authentication'
-        user = User.new(email: 'asdf@asdf.com',
-                        password: '',
-                        token: token)
+        user = User.new(email: 'asdf@asdf.com')
         expect(user.valid?).to eq(false)
         user.set(password: 'asdfasdf')
         expect(user.valid?).to eq(true)
       end
 
-      it 'should have a token' do
-        pending 'need to implement authnetication'
+      it 'should generate a token after', :db do
         user = User.new(email: 'asdf@asdf.com',
-                        password: 'asdfasdf',
-                        token: nil)
-        expect(user.valid?).to eq(false)
-        user.token = token
-        expect(user.valid?).to eq(true)
+                        password: 'asdfasdf')
+        expect(user.token).to eq(nil)
+        user.save
+        expect(user.token).not_to eq(nil)
       end
     end
   end

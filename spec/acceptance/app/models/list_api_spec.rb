@@ -10,6 +10,8 @@ module Todoable
       Todoable::API.new
     end
 
+    let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf') }
+
     let(:get_lists_response) do
       [
         {
@@ -36,22 +38,16 @@ module Todoable
       ]
     end
 
+    before do
+      create_token_header(user.token)
+    end
+
     # Retrieves lists
     describe 'GET /lists' do
       context 'when NO lists exist' do
         it 'returns []' do
           get '/lists'
-          expect(parsed_response[:lists]).to eq(nil)
-        end
-
-        it 'sends a status 404' do
-          get '/lists'
-          expect(last_response.status).to eq(404)
-        end
-
-        it 'informs user no lists exist' do
-          get '/lists'
-          expect(parsed_response[:error_message]).to eq('No lists exists')
+          expect(parsed_response[:lists]).to eq([])
         end
       end
 
@@ -61,9 +57,9 @@ module Todoable
         let(:trivial){ { name: 'Low Priority' } }
 
         before do
-          create_list(urgent)
-          create_list(medium)
-          create_list(trivial)
+          create_list(urgent, user.token)
+          create_list(medium, user.token)
+          create_list(trivial, user.token)
         end
 
         it 'returns all lists' do
@@ -84,7 +80,7 @@ module Todoable
       context 'when List exists' do
         it 'returns the list' do
           list = { name: 'important things' }
-          id = create_list(list)
+          id = create_list(list, user.token)
           get "lists/#{id}"
           expect(parsed_response).to match(
             list: {
@@ -119,7 +115,7 @@ module Todoable
       context 'with valid data' do
         it 'returns the ID and list name' do
           list = { name: 'important things' }
-          create_list(list)
+          create_list(list, user.token)
           expect(parsed_response).to match( { id: a_kind_of(Integer) })
         end
       end
@@ -143,19 +139,21 @@ module Todoable
     describe 'PATCH /lists/:list_id' do
       before do
         list = { name: 'to be updated' }
-        @id = create_list(list)
+        @id = create_list(list, user.token)
       end
 
       context 'When request is valid (List exists & name is valid)' do
         it 'responds with a status code 201 (OK)' do
-          patch "/lists/#{@id}", JSON.generate('name' => 'Name has been updated')
+          patch "/lists/#{@id}", JSON.generate(name: 'Name has been updated')
           expect(last_response.status).to eq(201)
         end
 
         it 'Updates the list' do
           get "/lists/#{@id}"
           expect(parsed_response[:list][:name]).to eq('to be updated')
+          create_token_header(user.token)
           patch "/lists/#{@id}", JSON.generate(name: 'Name has been updated')
+          create_token_header(user.token)
           get "/lists/#{@id}"
           expect(parsed_response[:list][:name]).to eq('Name has been updated')
         end
@@ -184,6 +182,7 @@ module Todoable
 
         it 'Does NOT update the list' do
           patch "/lists/#{@id}", JSON.generate(incorrect_name: [])
+          create_token_header(user.token)
           get "/lists/#{@id}"
           expect(parsed_response).to include({
             list: {
@@ -200,12 +199,13 @@ module Todoable
     describe 'DELETE /lists/:list_id' do
       before do
         list = { name: 'to be deleted' }
-        @id = create_list(list)
+        @id = create_list(list, user.token)
       end
 
       context 'when list exists' do
         it 'deletes the list and the list items' do
           delete "/lists/#{@id}"
+          create_token_header(user.token)
           get "/lists/#{@id}"
           expect(parsed_response[:error_message]).to eq('List does not exist')
           expect(last_response.status).to eq(404)
@@ -221,7 +221,9 @@ module Todoable
         it "doesn't delete any lists or items" do
           get "/lists"
           list_count = parsed_response[:lists].count
+          create_token_header(user.token)
           delete '/lists/-1'
+          create_token_header(user.token)
           get "/lists"
           new_list_count = parsed_response[:lists].count
           expect(list_count).to eq(new_list_count)

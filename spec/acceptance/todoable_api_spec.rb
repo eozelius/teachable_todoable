@@ -7,6 +7,8 @@ module Todoable
   RSpec.describe 'Todoable API', :db do
     include Rack::Test::Methods
 
+    let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf') }
+
     def app
       Todoable::API.new
     end
@@ -42,11 +44,13 @@ module Todoable
       medium  = { name: 'Medium Priority' }
       trivial = { name: 'Low Priority' }
 
-      create_list(urgent)
-      create_list(medium)
-      create_list(trivial)
+      create_list(urgent, user.token)
+      create_list(medium, user.token)
+      create_list(trivial, user.token)
 
+      create_token_header(user.token)
       get '/lists'
+
       expect(last_response.status).to eq(200)
       expect(parsed_response[:lists]).to match(get_lists_response)
     end

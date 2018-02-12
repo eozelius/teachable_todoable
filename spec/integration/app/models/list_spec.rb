@@ -6,7 +6,8 @@ module Todoable
   RSpec.describe List, :db do
     describe 'SQL associations' do
       let(:user) do
-        User.create(email: 'asdf@asdf.com')
+        User.create(email: 'asdf@asdf.com',
+                    password: 'asdfasdf')
       end
 
       before do
@@ -43,10 +44,15 @@ module Todoable
       end
 
       it 'will not save an Invalid item' do
-        pending 'figure out how to expect that an exception will be raised'
+        item_count = Item.count
         rotten_tomato = Item.new(name: nil)
         expect(rotten_tomato.valid?).to eq(false)
-        @list.add_item(rotten_tomato)
+        begin
+          @list.add_item(rotten_tomato)
+        rescue Exception => e
+          p "error => #{e}"
+        end
+        expect(Item.count).to eq(item_count)
       end
 
       it 'will destroy associated items when List is destroyed' do

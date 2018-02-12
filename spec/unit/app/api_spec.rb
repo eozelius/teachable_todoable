@@ -1,15 +1,12 @@
 require_relative '../../../app/api'
+require_relative '../../../app/models/user'
+require 'base64'
 require 'rack/test'
 
 module Todoable
-  RSpec.describe API do
+  RSpec.describe API, :db do
     include Rack::Test::Methods
     let(:ledger) { instance_double('Todoable::Ledger') }
-
-    def app
-      API.new(ledger: ledger)
-    end
-
     let(:hard_coded_response) do
       {lists: [
         {
@@ -20,6 +17,15 @@ module Todoable
       ]}
     end
 
+    def app
+      API.new(ledger: ledger)
+    end
+
+    before do
+      token_header = "Token token=\"7Xa8Im35hqUkldOp5ZxZJYuBJCqI9yQghvEumLjyXlZM1TjZEK2p1XOcuKt1kkQF83BSPVA2aIpW_bqsLyR0sg\""
+      header 'Authorization', token_header
+    end
+
     # Retrieve a single list
     describe 'GET /lists/:list_id' do
       context 'when list with given id exists' do
@@ -27,7 +33,6 @@ module Todoable
 
         before do
           allow(ledger).to receive(:retrieve)
-            .with(list_id)
             .and_return(RecordResult.new(true, hard_coded_response, nil))
         end
 
@@ -47,7 +52,6 @@ module Todoable
 
         before do
           allow(ledger).to receive(:retrieve)
-            .with(list_id)
             .and_return(RecordResult.new(false, nil, 'List does not exist'))
         end
 
@@ -73,7 +77,6 @@ module Todoable
 
         before do
           allow(ledger).to receive(:create_list)
-            .with(list)
             .and_return(RecordResult.new(true, response, nil))
         end
 
@@ -93,7 +96,6 @@ module Todoable
 
         before do
           allow(ledger).to receive(:create_list)
-            .with(invalid_list)
             .and_return(RecordResult.new(false, nil, 'Error name cannot be blank'))
         end
 

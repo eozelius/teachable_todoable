@@ -1,5 +1,6 @@
 require_relative '../../../../app/models/user'
 require_relative '../../../../app/models/list'
+require_relative '../../../../app/models/item'
 
 module Todoable
   RSpec.describe User, :db do
@@ -8,7 +9,8 @@ module Todoable
       let(:grocery_list) { List.new(name: 'grocery store') }
 
       before do
-        @user = User.create(email: 'asdf@asdf.com')
+        @user = User.create(email: 'asdf@asdf.com',
+                            password: 'asdfasdf')
         @user.add_list(grocery_list)
       end
 

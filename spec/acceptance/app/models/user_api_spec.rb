@@ -45,8 +45,8 @@ module Todoable
             auth_header = create_auth_header(user.email, '')
             header 'Authorization', auth_header
             post '/authenticate'
-            expect(last_response.status).to eq(422)
-            expect(parsed_response[:error_message]).to eq('invalid email:password combination')
+            expect(last_response.status).to eq(401)
+            expect(parsed_response[:error_message]).to eq('Invalid e-mail/password combination')
           end
 
           it 'does not generate a new token' do
@@ -90,17 +90,17 @@ module Todoable
           let(:non_existent_email) { 'aiblseusn8478@aolbgmcgh.jj2' }
           let(:invalid_password) { '' }
 
-          it 'returns a 401 when NO header is sent' do
+          it 'returns a 422 when NO header is sent' do
             post '/authenticate'
-            expect(last_response.status).to eq(401)
+            expect(last_response.status).to eq(422)
             expect(parsed_response[:error_message]).not_to eq(nil)
           end
 
-          it 'returns a 422 (unprocessable entity)' do
+          it 'returns a 401 (unauthorized)' do
             auth_header = create_auth_header(non_existent_email, invalid_password)
             header 'Authorization', auth_header
             post '/authenticate'
-            expect(last_response.status).to eq(422)
+            expect(last_response.status).to eq(401)
           end
 
           it 'returns a helpful error message' do

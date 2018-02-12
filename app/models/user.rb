@@ -1,6 +1,6 @@
 require 'bcrypt'
 require_relative '../../config/sequel'
-
+require 'securerandom'
 
 module Todoable
   class User < Sequel::Model
@@ -12,7 +12,12 @@ module Todoable
 
     # Authentication
     include BCrypt
-    attr_accessor :token
+
+    def generate_token!
+      self.token = SecureRandom.urlsafe_base64(64)
+      self.save
+      self.token
+    end
 
     def password
       @password ||= Password.new(password_digest)
@@ -21,12 +26,6 @@ module Todoable
     def password=(new_password)
       @password = Password.create(new_password)
       self.password_digest = @password
-    end
-
-    def generate_token!
-      self.token = SecureRandom.urlsafe_base64(64)
-      self.save
-      self.token
     end
 
     # Call Backs
@@ -38,23 +37,20 @@ module Todoable
       self.email = email.downcase
     end
 
+    def after_create
+      self.generate_token!
+    end
+
     # Validations
     def validate
       super
-      # email
       unless email && /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i =~ email
         errors.add(:email, 'invalid email')
       end
 
-      # password
-      # unless password && password.length > 6
-      #   errors.add(:password, 'invalid password')
-      # end
-      #
-      # # token
-      # unless token && token.length > 10
-      #   errors.add(:token, 'invalid token')
-      # end
+      unless @password
+        errors.add(:password, 'invalid password')
+      end
     end
   end
 end

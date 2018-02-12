@@ -1,4 +1,17 @@
-def create_list(list)
+require 'base64'
+
+def create_auth_header(email, password)
+  user_pass_digest = Base64.encode64("#{email}:#{password}")
+  "Basic #{user_pass_digest}"
+end
+
+def create_token_header(token)
+  token_header = "Token token=\"#{Base64.encode64(token)}\""
+  header 'Authorization', token_header
+end
+
+def create_list(list, token)
+  create_token_header(token)
   post '/lists', JSON.generate(list)
   expect(last_response.status).to eq(201)
   expect(parsed_response).to match({ id: a_kind_of(Integer) })
