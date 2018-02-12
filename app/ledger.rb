@@ -116,7 +116,7 @@ module Todoable
         }
         RecordResult.new(true, response, nil)
       else
-        RecordResult.new(false, nil, "Error - list is not valid")
+        RecordResult.new(false, nil, 'Error - list is not valid')
       end
     end
 

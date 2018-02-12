@@ -10,14 +10,8 @@ module Todoable
       super()
     end
 
-    before do
-      # Valid token required for every route except '/authenticate'
-      return if request.path_info == '/authenticate'
-      @token = get_token
-      if @token.nil?
-        halt 401, JSON.generate(error_message: 'Invalid Token')
-      end
-    end
+    # Every route except '/authenticate' requires a valid token.
+    before { parse_token }
 
     post '/authenticate' do
       email_password = parse_email_password
@@ -158,18 +152,6 @@ module Todoable
       end
     end
 
-    def get_token
-      return false if @env['HTTP_AUTHORIZATION'].nil?
-
-      begin
-        token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
-        Base64.decode64(token_digest)
-      rescue Esception => e
-        p "error => #{e}"
-        false
-      end
-    end
-
     def get_lists(token, list_id = nil)
       result = @ledger.retrieve(token, list_id)
       if result.success?
@@ -178,6 +160,16 @@ module Todoable
         status 404
         message = result.error_message || 'No lists exist'
         JSON.generate(error_message: message)
+      end
+    end
+
+    def parse_token
+      return false if @env['HTTP_AUTHORIZATION'].nil? || request.path_info == '/authenticate'
+      begin
+        token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
+        @token = Base64.decode64(token_digest)
+      rescue Exception => e
+        halt 401, JSON.generate(error_message: 'Invalid Token')
       end
     end
   end
