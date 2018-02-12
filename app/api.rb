@@ -10,6 +10,15 @@ module Todoable
       super()
     end
 
+    before do
+      # Valid token required for every route except '/authenticate'
+      return if request.path_info == '/authenticate'
+      @token = get_token
+      if @token.nil?
+        halt 401, JSON.generate(error_message: 'Invalid Token')
+      end
+    end
+
     post '/authenticate' do
       email_password = parse_email_password
       if !email_password
@@ -29,39 +38,23 @@ module Todoable
 
     # Retrieves all lists
     get '/lists' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-      get_lists(token)
+      get_lists(@token)
     end
 
     # Retrieve a single list
     get '/lists/:list_id' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-      get_lists(token, params[:list_id])
+      get_lists(@token, params[:list_id])
     end
 
     # Creates a list
     post '/lists' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
       list_params = JSON.parse(request.body.read, { symbolize_names: true })
       if list_params.nil?
         status 422
         return JSON.generate(error_message: 'List name is required')
       end
 
-      created_list = @ledger.create_list(token, list_params)
+      created_list = @ledger.create_list(@token, list_params)
       if created_list.success?
         status 201
         JSON.generate(created_list.response)
@@ -74,19 +67,13 @@ module Todoable
 
     # Create an item
     post '/lists/:list_id/items' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
       item = JSON.parse(request.body.read, { symbolize_names: true })
       if item.nil?
         status 422
         return JSON.generate(error_message: 'Item name is required')
       end
 
-      created_item = @ledger.create_item(params[:list_id], token, item)
+      created_item = @ledger.create_item(params[:list_id], @token, item)
       if created_item.success?
         status 201
         JSON.generate(created_item.response)
@@ -99,19 +86,13 @@ module Todoable
 
     # Updates the list
     patch '/lists/:list_id' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
       new_list = JSON.parse(request.body.read, { symbolize_names: true })
       if new_list.nil?
         status 422
         return JSON.generate(error_message: 'List name is required')
       end
 
-      updated_list = @ledger.update_list(params[:list_id], token, new_list)
+      updated_list = @ledger.update_list(params[:list_id], @token, new_list)
       if updated_list.success?
         status 201
         JSON.generate(updated_list.response)
@@ -124,13 +105,7 @@ module Todoable
 
     # Deletes the list and all items in it
     delete '/lists/:list_id' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
-      deleted_list = @ledger.delete_list(params[:list_id], token)
+      deleted_list = @ledger.delete_list(params[:list_id], @token)
       if deleted_list.success?
         status 204
         JSON.generate(deleted_list.response)
@@ -143,13 +118,7 @@ module Todoable
 
     # Mark this to_do item as finished
     put '/lists/:list_id/items/:item_id/finish' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
-      finished_item = @ledger.finish_item(params[:list_id], token, params[:item_id])
+      finished_item = @ledger.finish_item(params[:list_id], @token, params[:item_id])
       if finished_item.success?
         JSON.generate(finished_item.response)
       else
@@ -161,13 +130,7 @@ module Todoable
 
     # Deletes the item
     delete '/lists/:list_id/items/:item_id' do
-      token = get_token
-      if token.nil?
-        status 401
-        return JSON.generate(error_message: 'Invalid Token')
-      end
-
-      deleted_item = @ledger.delete_item(params[:list_id], token, params[:item_id])
+      deleted_item = @ledger.delete_item(params[:list_id], @token, params[:item_id])
       if deleted_item.success?
         status 204
       else
@@ -196,9 +159,15 @@ module Todoable
     end
 
     def get_token
-      return nil if @env['HTTP_AUTHORIZATION'].nil?
-      token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
-      Base64.decode64(token_digest)
+      return false if @env['HTTP_AUTHORIZATION'].nil?
+
+      begin
+        token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
+        Base64.decode64(token_digest)
+      rescue Esception => e
+        p "error => #{e}"
+        false
+      end
     end
 
     def get_lists(token, list_id = nil)
