@@ -6,8 +6,6 @@ if ENV['RACK_ENV'] == 'test'
   puts "required simplecov"
 end
 
-require 'factory_bot'
-require 'support/factory_bot'
 require 'bundler/setup'
 require 'todoable'
 require 'byebug'
