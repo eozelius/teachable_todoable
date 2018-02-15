@@ -17,7 +17,6 @@ module Todoable
     def validate
       super
 
-      # name
       unless name && name.length >= 1
         errors.add(:name, 'invalid name')
       end

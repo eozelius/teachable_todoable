@@ -81,14 +81,15 @@ module Todoable
         return RecordResult.new(false, nil, 'List does not exist')
       end
 
-      new_item = Item.new(name: item[:name])
+      new_item = Item.new(name: item[:name], list_id: list_id)
+
       if new_item.valid?
         list.add_item(new_item)
         response = { id: new_item.id }
         RecordResult.new(true, response, nil)
       else
-        error = new_item.errors || 'Error item could not be added to the list'
-        RecordResult.new(false, nil, error)
+        #error = new_item.errors || 'Error item could not be added to the list'
+        RecordResult.new(false, nil, 'Error item could not be added to the list')
       end
     end
 

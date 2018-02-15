@@ -9,7 +9,7 @@ module Todoable
     let(:user) { User.create(email: 'asdf@adsf.com', password: 'asdfasdf') }
 
     describe 'User integration methods' do
-      describe '#create_user(email, password) => creates a user' do
+      describe '#create_user(email, password)' do
         context 'email & password are valid' do
           it 'returns new users id and token ' do
             created_user = ledger.create_user('asdf@asdf.com', 'asdfasdf')
@@ -132,7 +132,7 @@ module Todoable
         end
       end
 
-      describe '#create_list(token, list) => creates a list' do
+      describe '#create_list(token, list)' do
         context 'token and list are valid' do
           it 'creates a new list' do
             list_count = List.count
@@ -226,20 +226,89 @@ module Todoable
 
       describe '#delete_list(list_id, token) => deletes a list' do
         context 'list_id and token are valid' do
-
+          it 'deletes the list' do
+            list_count = List.count
+            bucket_list = user.add_list(name: 'Bucket List')
+            deleted_list = ledger.delete_list(bucket_list.id, user.token)
+            expect(deleted_list.success?).to eq(true)
+            expect(List.count).to eq(list_count)
+          end
         end
 
         context 'list_id or token are invalid' do
+          it 'rejects invalid list_ids' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            deleted_list = ledger.delete_list('invalid list_id', user.token)
+            expect(deleted_list.success?).to eq(false)
+            expect(user.lists.last.id).to eq(bucket_list.id)
+          end
 
+          it 'rejects invalid tokens' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            user_2 = User.create(email: 'qwerty@qwerty.com', password: 'qwerty')
+            deleted_list = ledger.delete_list(bucket_list.id, user_2.token)
+            expect(deleted_list.success?).to eq(false)
+            expect(user.lists.last.name).to eq('Bucket List')
+          end
         end
       end
     end
 
 
     describe 'Item integration methods' do
-      it 'creates an item => #create_item(list_id, token, item)'
-      it 'marks an item as finished => #finish_item(list_id,token, item_id)'
-      it 'deletes an item => #delete_item(list_id, token, item_id'
+      describe '#create_item(list_id, token, item)' do
+        context 'list_id, token and item are valid' do
+          it 'creates a new list' do
+            item_count = Item.count
+            bucket_list = user.add_list(name: 'Bucket List')
+            grand_canyon = { name: 'grand canyon' }
+            created_list = ledger.create_item(bucket_list.id, user.token, grand_canyon)
+            expect(created_list.success?).to eq(true)
+            expect(Item.count).to eq(item_count + 1)
+          end
+
+          it 'associates the new item with the given' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            grand_canyon = { name: 'grand canyon' }
+            created_list = ledger.create_item(bucket_list.id, user.token, grand_canyon)
+            expect(created_list.success?).to eq(true)
+            expect(bucket_list.items.last.name).to eq(grand_canyon[:name])
+          end
+        end
+
+        context 'list_id, token or item are invalid' do
+          it 'rejects invalid list_id' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            grand_canyon = { name: 'grand canyon' }
+            created_list = ledger.create_item('invalid list id', user.token, grand_canyon)
+            expect(created_list.success?).to eq(false)
+            expect(created_list.error_message).to eq('List does not exist')
+          end
+
+          it 'rejects invalid tokens' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            grand_canyon = { name: 'grand canyon' }
+            created_list = ledger.create_item(bucket_list.id, 'invalid user token', grand_canyon)
+            expect(created_list.success?).to eq(false)
+            expect(created_list.error_message).to eq('Invalid Token')
+          end
+
+          it 'rejects invalid items' do
+            bucket_list = user.add_list(name: 'Bucket List')
+            created_list = ledger.create_item(bucket_list.id, user.token, { name: nil} )
+            expect(created_list.success?).to eq(false)
+            expect(created_list.error_message).to eq('Error item could not be added to the list')
+          end
+        end
+      end
+
+      describe '#finish_item(list_id,token, item_id)' do
+
+      end
+
+      describe '#delete_item(list_id, token, item_id)' do
+
+      end
     end
 
 
