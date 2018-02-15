@@ -134,9 +134,44 @@ module Todoable
 
       describe '#create_list(token, list) => creates a list' do
         context 'token and list are valid' do
+          it 'creates a new list' do
+            list_count = List.count
+            books = { name: 'books to read' }
+            created_list = ledger.create_list(user.token, books)
+            expect(created_list.success?).to eq(true)
+            expect(List.count).to eq(list_count + 1)
+          end
+
+          it 'returns the list id' do
+            books = { name: 'books to read' }
+            created_list = ledger.create_list(user.token, books)
+            expect(created_list.response).to match({ id: a_kind_of(Integer) })
+          end
+
+          it 'associates the list with the user' do
+            books = { name: 'books to read' }
+            created_list = ledger.create_list(user.token, books)
+            created_list_id = created_list.response[:id]
+            expect(user.lists.last.id).to eq(created_list_id)
+          end
         end
 
         context 'token or list are invalid' do
+          it 'Does Not create a new list' do
+            list_count = List.count
+            movies = { name: 'movies to watch - this list will not be created :)' }
+            created_list = ledger.create_list('invalid token', movies)
+            expect(created_list.success?).to eq(false)
+            expect(created_list.error_message).to eq('Invalid Token')
+            expect(List.count).to eq(list_count)
+          end
+
+          it 'returns a helpful error' do
+            movies = { name: nil }
+            created_list = ledger.create_list(user.token, movies)
+            expect(created_list.success?).to eq(false)
+            expect(created_list.error_message).to eq('Error list could not be created')
+          end
         end
       end
 
