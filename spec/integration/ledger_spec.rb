@@ -7,6 +7,8 @@ module Todoable
   RSpec.describe Ledger, :db do
     let(:ledger) { Ledger.new }
     let(:user) { User.create(email: 'asdf@adsf.com', password: 'asdfasdf') }
+    let(:list) { user.add_list(name: 'Bucket List ') }
+    let(:item) { list.add_item(name: 'visit grand canyon') }
 
     describe 'User integration methods' do
       describe '#create_user(email, password)' do
@@ -29,52 +31,52 @@ module Todoable
       end
 
       describe '#generate_token(email, password) => returns a new token or creates a new user' do
-      context 'user exists and email and password are valid' do
-        it 'generates and returns a new token' do
-          user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
-          generated_token = ledger.generate_token(user.email, 'asdfasdf')
-          expect(generated_token.success?).to eq(true)
-          expect(generated_token.response).to match({ token: a_kind_of(String) })
-        end
-      end
-
-      context 'user exists, BUT email:password are invalid' do
-        it 'returns "Invalid email/password combination"' do
-          user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
-          generated_token = ledger.generate_token(user.email, 'these are not the droids your looking for')
-          expect(generated_token.success?).to eq(false)
-          expect(generated_token.error_message).to eq('Invalid e-mail/password combination')
+        context 'user exists and email and password are valid' do
+          it 'generates and returns a new token' do
+            user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
+            generated_token = ledger.generate_token(user.email, 'asdfasdf')
+            expect(generated_token.success?).to eq(true)
+            expect(generated_token.response).to match({ token: a_kind_of(String) })
+          end
         end
 
-        it 'does not generate a new token for the existing user' do
-          user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
-          user_token = user.token
-          ledger.generate_token(user.email, 'these are not the droids your looking for')
-          expect(user.token).to eq(user_token)
-        end
-      end
+        context 'user exists, BUT email:password are invalid' do
+          it 'returns "Invalid email/password combination"' do
+            user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
+            generated_token = ledger.generate_token(user.email, 'these are not the droids your looking for')
+            expect(generated_token.success?).to eq(false)
+            expect(generated_token.error_message).to eq('Invalid e-mail/password combination')
+          end
 
-      context 'user does not exist, email:password are Invalid' do
-        it 'does not create a new user' do
-          user_count = User.count
-          generated_token = ledger.generate_token('asdf_is not an email', 'asdfasdf')
-          expect(generated_token.success?).to eq(false)
-          expect(generated_token.error_message).to eq('user could not be created')
-          expect(User.count).to eq(user_count)
+          it 'does not generate a new token for the existing user' do
+            user = User.create(email: 'asdf@asdf.com', password: 'asdfasdf')
+            user_token = user.token
+            ledger.generate_token(user.email, 'these are not the droids your looking for')
+            expect(user.token).to eq(user_token)
+          end
         end
-      end
 
-      context 'user does not exist, email:password are Valid => create new user' do
-        it 'creates a new user, returns id and token ' do
-          user_count = User.count
-          generated_token = ledger.generate_token('asdf@asdf.com', 'asdfasdf')
-          expect(generated_token.success?).to eq(true)
-          expect(generated_token.response).to match({ id: a_kind_of(Integer),
-                                                      token: a_kind_of(String) })
-          expect(User.count).to eq(user_count + 1)
+        context 'user does not exist, email:password are Invalid' do
+          it 'does not create a new user' do
+            user_count = User.count
+            generated_token = ledger.generate_token('asdf_is not an email', 'asdfasdf')
+            expect(generated_token.success?).to eq(false)
+            expect(generated_token.error_message).to eq('user could not be created')
+            expect(User.count).to eq(user_count)
+          end
+        end
+
+        context 'user does not exist, email:password are Valid => create new user' do
+          it 'creates a new user, returns id and token ' do
+            user_count = User.count
+            generated_token = ledger.generate_token('asdf@asdf.com', 'asdfasdf')
+            expect(generated_token.success?).to eq(true)
+            expect(generated_token.response).to match({ id: a_kind_of(Integer),
+                                                        token: a_kind_of(String) })
+            expect(User.count).to eq(user_count + 1)
+          end
         end
       end
-    end
     end
 
     describe 'List integration methods' do
