@@ -201,8 +201,9 @@ module Todoable
       RecordResult.new(true, { lists: response }, nil)
     end
 
-    def fetch_single_list(list_id, user_id)
+    def fetch_single_list(user_id, list_id)
       list = List.find(user_id: user_id, id: list_id)
+
       if list.nil?
         RecordResult.new(false, [], 'List does not exist')
       else
