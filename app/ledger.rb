@@ -138,17 +138,13 @@ module Todoable
         return RecordResult.new(false, nil, 'Item does not exist')
       end
 
-      begin
-        if item.finished_at.nil?
-          item.set(finished_at: DateTime.now)
-        else
-          item.set(finished_at: nil)
-        end
-        item.save
-        RecordResult.new(true, item.finished_at, nil)
-      rescue Exception => e
-        RecordResult.new(false, nil, e)
+      if item.finished_at.nil?
+        item.set(finished_at: DateTime.now)
+      else
+        item.set(finished_at: nil)
       end
+      item.save
+      RecordResult.new(true, item.finished_at, nil)
     end
 
     def delete_list(list_id, token)
