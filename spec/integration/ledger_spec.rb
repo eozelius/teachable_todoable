@@ -177,11 +177,50 @@ module Todoable
 
       describe '#update_list(list_id, token, new_list) => updates a list' do
         context 'list_id, token, new_list are valid' do
+          it 'updates the users list' do
+            original_list = user.add_list(name: 'original list')
+            new_list = { name: 'new name' }
+            updated_list = ledger.update_list(original_list.id, user.token, new_list)
+            expect(updated_list.success?).to eq(true)
+            original_list.reload
+            expect(original_list.name).to eq('new name')
+          end
 
+          it 'returns the id and new name' do
+            original_list = user.add_list(name: 'original list')
+            new_list = { name: 'new name' }
+            updated_list = ledger.update_list(original_list.id, user.token, new_list)
+            expect(updated_list.success?).to eq(true)
+            expect(updated_list.response).to match({ :list =>
+                                                       { :id=>1,
+                                                         :name=>"new name"}})
+          end
         end
 
         context 'list_id, token, or new_list are invalid' do
+          it 'rejects invalid list ids' do
+            user.add_list(name: 'original list')
+            new_list = { name: 'new name'}
+            incorrect_list_id = 0
+            updated_list = ledger.update_list(incorrect_list_id, user.token, new_list)
+            expect(updated_list.success?).to eq(false)
+          end
 
+          it 'rejects invalid tokens' do
+            original_list = user.add_list(name: 'original list')
+            new_list = { name: 'new name' }
+            updated_list = ledger.update_list(original_list.id, 'invalid user token', new_list)
+            expect(updated_list.success?).to eq(false)
+            expect(updated_list.error_message).to eq('Invalid Token')
+          end
+
+          it 'rejects invalid updated properties' do
+            original_list = user.add_list(name: 'original list')
+            new_invalid_list = { name: nil }
+            updated_list = ledger.update_list(original_list.id, user.token, new_invalid_list)
+            expect(updated_list.success?).to eq(false)
+            expect(updated_list.error_message).to eq('Error - list is not valid')
+          end
         end
       end
 
