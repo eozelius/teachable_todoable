@@ -158,12 +158,8 @@ module Todoable
         return RecordResult.new(false, nil, 'List does not exist')
       end
 
-      begin
-        list.destroy
-        RecordResult.new(true, 'List successfully deleted', nil)
-      rescue Exception => e
-        RecordResult.new(false, nil, "Error - list could not be deleted \n error => #{e}")
-      end
+      list.destroy
+      RecordResult.new(true, 'List successfully deleted', nil)
     end
 
     def delete_item(list_id, token, item_id)
@@ -182,12 +178,8 @@ module Todoable
         return RecordResult.new(false, nil, 'Item does not exist')
       end
 
-      begin
-        item.destroy
-        RecordResult.new(true, 'Item successfully deleted', nil)
-      rescue Exception => e
-        RecordResult.new(false, nil, "Error - item could not be deleted \n error => #{e}")
-      end
+      item.destroy
+      RecordResult.new(true, 'Item successfully deleted', nil)
     end
 
     private

@@ -218,6 +218,12 @@ module Todoable
             expect(deleted_list.success?).to eq(true)
             expect(@user.lists).to eq([])
           end
+
+          it 'deletes the list items' do
+            item_count = Item.count
+            deleted_list = @ledger.delete_list(@bucket_list.id, @user.token)
+            expect(Item.count).to eq(item_count - 1)
+          end
         end
 
         context 'list_id or token are invalid' do
@@ -227,11 +233,17 @@ module Todoable
             expect(@user.lists.last.id).to eq(@bucket_list.id)
           end
 
-          it 'rejects invalid tokens' do
+          it 'does not delete anything, unless the list belongs to the correct user' do
             user_2 = User.create(email: 'qwerty@qwerty.com', password: 'qwerty')
             deleted_list = @ledger.delete_list(@bucket_list.id, user_2.token)
             expect(deleted_list.success?).to eq(false)
             expect(@user.lists.last.name).to eq('Bucket List')
+          end
+
+          it 'rejects invalid tokens' do
+            deleted_list = @ledger.delete_list(@bucket_list.id, 'invalid token')
+            expect(deleted_list.success?).to eq(false)
+            expect(List.find(@bucket_list.id)).not_to eq([])
           end
         end
       end
@@ -279,7 +291,7 @@ module Todoable
       end
 
       describe '#finish_item(list_id,token, item_id)' do
-        context 'list_id, token and item_id are valid' do
+        context 'valid list_id, token and item_id' do
           it 'marks the item as finished' do
             expect(@grand_canyon.finished_at).to eq(nil)
             finished_item = @ledger.finish_item(@bucket_list.id, @user.token, @grand_canyon.id)
@@ -322,7 +334,34 @@ module Todoable
       end
 
       describe '#delete_item(list_id, token, item_id)' do
+        context 'valid list_id, token and item_id' do
+          it 'deletes the item' do
+            deleted_item = @ledger.delete_item(@bucket_list.id, @user.token, @grand_canyon.id)
+            expect(deleted_item.success?).to eq(true)
+            expect(deleted_item.response).to eq('Item successfully deleted')
+            expect(Item.find(@grand_canyon.id)).to eq([])
+          end
+        end
 
+        context 'invalid list_id, token or item_id' do
+          it 'rejects invalid list_ids' do
+            deleted_item = @ledger.delete_item('invalid list id', @user.token, @grand_canyon.id)
+            expect(deleted_item.success?).to eq(false)
+            expect(deleted_item.error_message).to eq('List does not exist')
+          end
+
+          it 'rejects invalid tokens' do
+            deleted_item = @ledger.delete_item(@bucket_list.id, nil, @grand_canyon.id)
+            expect(deleted_item.success?).to eq(false)
+            expect(deleted_item.error_message).to eq('Invalid Token')
+          end
+
+          it 'rejects invalid item_ids' do
+            deleted_item = @ledger.delete_item(@bucket_list.id, @user.token, 0)
+            expect(deleted_item.success?).to eq(false)
+            expect(deleted_item.error_message).to eq('Item does not exist')
+          end
+        end
       end
     end
   end
