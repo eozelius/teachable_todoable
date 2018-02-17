@@ -13,8 +13,6 @@ module Todoable
     before do
       @ledger = Ledger.new
       @user = User.create(email: 'asdf@adsf.com', password: 'asdfasdf')
-      # @bucket_list  = @user.add_list(name: 'Bucket List')
-      # @grand_canyon = @bucket_list.add_item(name: 'visit grand canyon')
     end
 
     describe 'Token based Authentication' do
@@ -274,8 +272,57 @@ module Todoable
     end
 
     describe 'Item Endpoints' do
-      describe 'post /lists/:list_id/items' do
+      before do
+        create_token_header(@user.token)
+        @item_bucket_list = List.create(name: 'Bucket List', user_id: @user.id)
+        @grand_canyon = { name: 'visit grand canyon' }
+      end
 
+      describe 'post /lists/:list_id/items => create an item' do
+        context 'with valid data' do
+          it 'returns a 201 (OK) and the id' do
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            expect(last_response.status).to eq(201)
+            expect(parsed_response[:id]).to match(a_kind_of(Integer))
+          end
+
+          it 'creates a new item' do
+            item_count = Item.count
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            expect(Item.count).to eq(item_count + 1)
+          end
+
+          it 'associates the newly created item with the correct list' do
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            list_items = List.find(@item_bucket_list.id).first.items
+            expect(list_items.first.name).to eq(@grand_canyon[:name])
+          end
+        end
+
+        context 'Invalid Data' do
+          it 'rejects invalid list_ids' do
+            post "/lists/-1/items", JSON.generate(@grand_canyon)
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('List does not exist')
+          end
+
+          it 'rejects invalid Item params' do
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(name: '')
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('Item could not be created')
+          end
+
+          it 'does not create any new items' do
+            item_count = Item.count
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate({ invalid_name_key: '' })
+            expect(Item.count).to eq(item_count)
+          end
+
+          it 'rejects empty Item params' do
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate({})
+            expect(last_response.status).to eq(422)
+          end
+        end
       end
 
       describe 'put /lists/:list_id/items/:item_id/finish' do

@@ -89,7 +89,7 @@ module Todoable
         RecordResult.new(true, response, nil)
       else
         #error = new_item.errors || 'Error item could not be added to the list'
-        RecordResult.new(false, nil, 'Error item could not be added to the list')
+        RecordResult.new(false, nil, 'Item could not be created')
       end
     end
 

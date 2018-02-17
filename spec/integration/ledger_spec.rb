@@ -285,7 +285,7 @@ module Todoable
           it 'rejects invalid items' do
             created_list = @ledger.create_item(@bucket_list.id, @user.token, { name: nil} )
             expect(created_list.success?).to eq(false)
-            expect(created_list.error_message).to eq('Error item could not be added to the list')
+            expect(created_list.error_message).to eq('Item could not be created')
           end
         end
       end
