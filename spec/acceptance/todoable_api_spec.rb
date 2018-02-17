@@ -13,8 +13,8 @@ module Todoable
     before do
       @ledger = Ledger.new
       @user = User.create(email: 'asdf@adsf.com', password: 'asdfasdf')
-      @bucket_list  = @user.add_list(name: 'Bucket List')
-      @grand_canyon = @bucket_list.add_item(name: 'visit grand canyon')
+      # @bucket_list  = @user.add_list(name: 'Bucket List')
+      # @grand_canyon = @bucket_list.add_item(name: 'visit grand canyon')
     end
 
     describe 'Token based Authentication' do
@@ -108,8 +108,32 @@ module Todoable
     end
 
     describe 'List Endpoints' do
-      describe 'get /lists => fetch all lists that belong to user' do
+      before { create_token_header(@user.token) }
 
+      describe 'get /lists => fetch all lists that belong to user' do
+        it 'returns [] if NO lists exist' do
+          get '/lists'
+          expect(parsed_response[:lists]).to eq([])
+        end
+
+        context 'when lists exist' do
+          let(:urgent) { { name: 'Urgent Things' } }
+          let(:medium) { { name: 'Medium Priority' } }
+          let(:trivial){ { name: 'Low Priority' } }
+
+          before do
+            create_list(urgent, @user.token)
+            create_list(medium, @user.token)
+            create_list(trivial, @user.token)
+          end
+
+          it 'returns all lists' do
+            get '/lists'
+            expect(parsed_response[:lists]).to match([ {:list=>{:id=>1, :name=>"Urgent Things", :items=>[]}},
+                                                       {:list=>{:id=>2, :name=>"Medium Priority", :items=>[]}},
+                                                       {:list=>{:id=>3, :name=>"Low Priority", :items=>[]}} ])
+          end
+        end
       end
 
       describe 'get /lists/:list_id => fetch a particular list' do
