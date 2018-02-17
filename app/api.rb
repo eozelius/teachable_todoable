@@ -74,8 +74,8 @@ module Todoable
     # Updates the list
     patch '/lists/:list_id' do
       new_list = JSON.parse(request.body.read, { symbolize_names: true })
-      if new_list.nil?
-        halt 422, JSON.generate(error_message: 'List name is required')
+      if new_list.empty?
+        halt 422, JSON.generate(error_message: 'List is required')
       end
 
       updated_list = @ledger.update_list(params[:list_id], @token, new_list)

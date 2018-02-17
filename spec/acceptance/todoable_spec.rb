@@ -161,8 +161,8 @@ module Todoable
         context 'valid data' do
           it 'returns the ID' do
             list = { name: 'Bucket List' }
-            create_list(list, @user.token)
-            expect(parsed_response).to match( { id: a_kind_of(Integer) })
+            id = create_list(list, @user.token)
+            expect(parsed_response).to match( { id: id })
           end
         end
 
@@ -188,7 +188,47 @@ module Todoable
       end
 
       describe 'patch /lists/:list_id => update a list' do
+        before do
+          list = { name: 'Original Bucket List' }
+          @patch_list_id = create_list(list, @user.token)
+        end
 
+        context 'Valid request (List exists & name is valid)' do
+          it 'responds with a status code 201 (OK)' do
+            patch "/lists/#{@patch_list_id}", JSON.generate(name: 'Name has been updated')
+            expect(last_response.status).to eq(201)
+          end
+
+          it 'Updates the list' do
+            patch "/lists/#{@patch_list_id}", JSON.generate(name: 'Updated!!!')
+            get "/lists/#{@patch_list_id}"
+            expect(parsed_response[:list][:name]).to eq('Updated!!!')
+          end
+
+          it 'Returns the new list once it has been updated' do
+            patch "/lists/#{@patch_list_id}", JSON.generate(name: 'Updated!!!')
+            expect(parsed_response).to include({ list: {
+                                                   id: a_kind_of(Integer),
+                                                   name: 'Updated!!!' }} )
+          end
+        end
+
+        context 'Invalid Request (List doesnt exist, or name/items are invalid)' do
+          it 'rejects request without a list name, with a 422 and a helpful message' do
+            patch "/lists/#{@patch_list_id}", JSON.generate({})
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('List is required')
+          end
+
+          it 'Does NOT update the list' do
+            patch "/lists/#{@patch_list_id}", JSON.generate(name: '')
+            get "/lists/#{@patch_list_id}"
+            expect(parsed_response).to include({ list: {
+                                                   name: 'Original Bucket List',
+                                                   id: @patch_list_id,
+                                                   items: [] } })
+          end
+        end
       end
 
       describe 'delete /lists/:list_id' do
