@@ -137,7 +137,24 @@ module Todoable
       end
 
       describe 'get /lists/:list_id => fetch a particular list' do
+        it 'returns a particular list' do
+          bucket_list = { name: 'Bucket List' }
+          id = create_list(bucket_list, @user.token)
+          get "lists/#{id}"
+          expect(parsed_response).to match(list: {
+                                             id: id,
+                                             name: 'Bucket List',
+                                             items: [] } )
+        end
 
+        context 'when List does NOT exist' do
+          it 'returns a 404 and a helpful error message' do
+            get '/lists/-1'
+            expect(last_response.status).to eq(404)
+            expect(parsed_response[:error_message]).to eq('List does not exist')
+            expect(parsed_response[:list]).to eq(nil)
+          end
+        end
       end
 
       describe 'post /lists => create a list' do

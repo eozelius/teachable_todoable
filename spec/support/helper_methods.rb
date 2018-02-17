@@ -1,4 +1,5 @@
 require 'base64'
+require 'json'
 
 def create_auth_header(email, password)
   user_pass_digest = Base64.encode64("#{email}:#{password}")
