@@ -158,7 +158,33 @@ module Todoable
       end
 
       describe 'post /lists => create a list' do
+        context 'valid data' do
+          it 'returns the ID' do
+            list = { name: 'Bucket List' }
+            create_list(list, @user.token)
+            expect(parsed_response).to match( { id: a_kind_of(Integer) })
+          end
+        end
 
+        context 'with Invalid data' do
+          it 'rejects lists without a name key' do
+            list = { this_is_invalid: 44 }
+            post '/lists', JSON.generate(list)
+            expect(last_response.status).to eq(422)
+          end
+
+          it 'rejects lists with invalid name values, and provides a helpful error message' do
+            list = { name: '' }
+            post '/lists', JSON.generate(list)
+            expect(parsed_response[:error_message]).to eq('Error list could not be created')
+          end
+
+          it 'rejects a request without list params' do
+            post '/lists', JSON.generate({})
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('List is required')
+          end
+        end
       end
 
       describe 'patch /lists/:list_id => update a list' do

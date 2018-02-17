@@ -38,8 +38,8 @@ module Todoable
     # Creates a list
     post '/lists' do
       list_params = JSON.parse(request.body.read, { symbolize_names: true })
-      if list_params.nil?
-        halt 422, JSON.generate(error_message: 'List name is required')
+      if list_params.empty?
+        halt 422, JSON.generate(error_message: 'List is required')
       end
 
       created_list = @ledger.create_list(@token, list_params)
@@ -56,7 +56,7 @@ module Todoable
     # Create an item
     post '/lists/:list_id/items' do
       item = JSON.parse(request.body.read, { symbolize_names: true })
-      if item.nil?
+      if item.empty?
         halt 422, JSON.generate(error_message: 'Item name is required')
       end
 
