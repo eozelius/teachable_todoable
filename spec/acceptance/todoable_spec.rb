@@ -232,7 +232,44 @@ module Todoable
       end
 
       describe 'delete /lists/:list_id' do
+        context 'when list exists' do
+          before do
+            @delete_list = List.create(name: 'to be deleted', user_id: @user.id)
+            @delete_list.add_item(name: 'item to be deleted')
+          end
 
+          it 'deletes the list and the list items' do
+            delete "/lists/#{@delete_list.id}"
+            get "/lists/#{@delete_list.id}"
+            expect(parsed_response[:error_message]).to eq('List does not exist')
+            expect(last_response.status).to eq(404)
+          end
+
+          it 'returns a status 204 (no content)' do
+            delete "/lists/#{@delete_list.id}"
+            expect(last_response.status).to eq(204)
+          end
+
+          it 'deletes the associated items' do
+            item_count = Item.count
+            delete "/lists/#{@delete_list.id}"
+            expect(Item.count).to eq(item_count - 1)
+          end
+        end
+
+        context 'when list does not exists' do
+          it "doesn't delete any lists" do
+            list_count = List.count
+            delete '/lists/-1'
+            expect(List.count).to eq(list_count)
+          end
+
+          it 'returns a 422 (Unprocessable entity) and a helpful error message' do
+            delete '/lists/-1'
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('List does not exist')
+          end
+        end
       end
     end
 
