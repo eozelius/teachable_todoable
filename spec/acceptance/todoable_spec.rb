@@ -275,33 +275,34 @@ module Todoable
       before do
         create_token_header(@user.token)
         @item_bucket_list = List.create(name: 'Bucket List', user_id: @user.id)
-        @grand_canyon = { name: 'visit grand canyon' }
+        @grand_canyon_params = { name: 'visit grand canyon' }
+        @yosemite = @item_bucket_list.add_item(name: 'visit yosemite national park')
       end
 
       describe 'post /lists/:list_id/items => create an item' do
         context 'with valid data' do
           it 'returns a 201 (OK) and the id' do
-            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon_params)
             expect(last_response.status).to eq(201)
             expect(parsed_response[:id]).to match(a_kind_of(Integer))
           end
 
           it 'creates a new item' do
             item_count = Item.count
-            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon_params)
             expect(Item.count).to eq(item_count + 1)
           end
 
           it 'associates the newly created item with the correct list' do
-            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon)
+            post "/lists/#{@item_bucket_list.id}/items", JSON.generate(@grand_canyon_params)
             list_items = List.find(@item_bucket_list.id).first.items
-            expect(list_items.first.name).to eq(@grand_canyon[:name])
+            expect(list_items.last.name).to eq(@grand_canyon_params[:name])
           end
         end
 
         context 'Invalid Data' do
           it 'rejects invalid list_ids' do
-            post "/lists/-1/items", JSON.generate(@grand_canyon)
+            post "/lists/-1/items", JSON.generate(@grand_canyon_params)
             expect(last_response.status).to eq(422)
             expect(parsed_response[:error_message]).to eq('List does not exist')
           end
@@ -325,7 +326,45 @@ module Todoable
         end
       end
 
-      describe 'put /lists/:list_id/items/:item_id/finish' do
+      describe 'put /lists/:list_id/items/:item_id/finish => Mark an item as finished' do
+        context 'Valid request: (List & item exist)' do
+          it 'marks the item as finished (if unfinished) and returns a 201' do
+            @yosemite.set(finished_at: nil)
+            @yosemite.save
+            put "/lists/#{@item_bucket_list.id}/items/#{@yosemite.id}/finish"
+            expect(last_response.status).to eq(200)
+            @yosemite.reload
+            expect(@yosemite.finished_at.class).to eq(Time)
+          end
+
+          it 'marks the item as incomplete (if previously marked finished)' do
+            @yosemite.set(finished_at: DateTime.now)
+            @yosemite.save
+            put "/lists/#{@item_bucket_list.id}/items/#{@yosemite.id}/finish"
+            expect(last_response.status).to eq(200)
+            @yosemite.reload
+            expect(@yosemite.finished_at).to eq(nil)
+          end
+        end
+
+        context 'invalid request: list_id or item_id are invalid' do
+          it 'rejects invalid list_ids' do
+            put "/lists/-1/items/#{@yosemite.id}/finish"
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('List does not exist')
+          end
+
+          it 'rejects invalid item_ids' do
+            put "/lists/#{@item_bucket_list.id}/items/-1/finish"
+            expect(last_response.status).to eq(422)
+            expect(parsed_response[:error_message]).to eq('Item does not exist')
+          end
+
+          it 'does not mark the item as finished' do
+            put "/lists/#{@item_bucket_list.id}/items/-1/finish"
+            expect(@yosemite.finished_at).to eq(nil)
+          end
+        end
       end
 
       describe 'delete /lists/:list_id/items/:item_id' do
