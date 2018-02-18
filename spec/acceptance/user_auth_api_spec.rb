@@ -10,14 +10,12 @@ module Todoable
       Todoable::API.new
     end
 
-    before do
-      @user = User.create(email: 'asdf@adsf.com', password: 'asdfasdf')
-    end
+    let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf') }
 
     describe 'Token based Authentication' do
       it 'returns false if user attempting to authenticate with -u (email:password) header' do
-        # No Token header Sent
-        create_auth_header(@user.email, 'asdfasdf')
+        # No Token header Sent - no error returned
+        create_auth_header(user.email, 'asdfasdf')
         post '/authenticate'
         expect(parsed_response[:error_message]).to eq(nil)
       end
@@ -29,7 +27,7 @@ module Todoable
       end
 
       it 'decodes an HTTP_AUTHORIZATION header, and assigns a @token var to be used in all subsequent Sinatra routes' do
-        create_token_header(@user.token)
+        create_token_header(user.token)
         get '/lists'
         expect(last_response.status).to eq(200)
         expect(parsed_response[:error_message]).to eq(nil)
@@ -40,10 +38,10 @@ module Todoable
     describe 'post /authenticate => email:password Authentication' do
       context 'User already exists' do
         context 'valid request: email:password present and correct' do
-          before { create_auth_header(@user.email, 'asdfasdf') }
+          before { create_auth_header(user.email, 'asdfasdf') }
 
           it 'generates a new token' do
-            old_token = @user.token
+            old_token = user.token
             post '/authenticate'
             expect(old_token).not_to eq(parsed_response[:token])
           end
@@ -56,17 +54,17 @@ module Todoable
 
         context 'invalid request: email:password missing or incorrect' do
           it 'returns 401 (unauthorized) and helpful error message' do
-            create_auth_header(@user.email, 'This is not the password you are looking for')
+            create_auth_header(user.email, 'This is not the password you are looking for')
             post '/authenticate'
             expect(last_response.status).to eq(401)
             expect(parsed_response[:error_message]).to eq('Invalid e-mail/password combination')
           end
 
           it 'does not generate a new token' do
-            old_token = @user.token
+            old_token = user.token
             create_auth_header('invalid email address', 'asdfasdf')
             post '/authenticate'
-            expect(old_token).to eq(@user.token)
+            expect(old_token).to eq(user.token)
           end
         end
       end
