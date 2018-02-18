@@ -1,9 +1,10 @@
 require 'rack/test'
 require 'json'
 require_relative '../../app/api'
+require_relative '../../app/models/list'
 
 module Todoable
-  RSpec.describe 'Todoable API endpoint', :db do
+  RSpec.describe 'List API endpoints', :db do
     include Rack::Test::Methods
 
     def app
