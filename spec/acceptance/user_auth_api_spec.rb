@@ -3,7 +3,7 @@ require 'json'
 require_relative '../../app/api'
 
 module Todoable
-  RSpec.describe 'Todoable API endpoint', :db do
+  RSpec.describe 'User Authentication API endpoints', :db do
     include Rack::Test::Methods
 
     def app
@@ -15,6 +15,26 @@ module Todoable
     end
 
     describe 'Token based Authentication' do
+      it 'returns false if user attempting to authenticate with -u (email:password) header' do
+        # No Token header Sent
+        create_auth_header(@user.email, 'asdfasdf')
+        post '/authenticate'
+        expect(parsed_response[:error_message]).to eq(nil)
+      end
+
+      it 'halts Sinatra and returns a 401 (Unauthorized), unless HTTP_AUTHORIZATION header is present' do
+        get '/lists'
+        expect(last_response.status).to eq(401)
+        expect(parsed_response[:error_message]).to eq('Token required')
+      end
+
+      it 'decodes an HTTP_AUTHORIZATION header, and assigns a @token var to be used in all subsequent Sinatra routes' do
+        create_token_header(@user.token)
+        get '/lists'
+        expect(last_response.status).to eq(200)
+        expect(parsed_response[:error_message]).to eq(nil)
+        expect(parsed_response[:lists]).not_to eq(nil)
+      end
     end
 
     describe 'post /authenticate => email:password Authentication' do
