@@ -12,4 +12,5 @@
 .idea/*
 Gemfile.lock
 .byebug_history
-db/*
+/db/development.db
+/db/test.db
