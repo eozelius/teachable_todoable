@@ -3,3 +3,5 @@ language: ruby
 rvm:
   - 2.4.1
 before_install: gem install bundler -v 1.16.0
+before_script: sequel -m "./db/migrations/" sqlite://db/development.db --echo
+before_script: sequel -m "./db/migrations/" sqlite://db/test.db --echo
