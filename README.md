@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/eozelius/teachable_todoable.svg?branch=master)](https://travis-ci.org/eozelius/teachable_todoable)
-
+[![Maintainability](https://api.codeclimate.com/v1/badges/d3cdf6ae8c4a59e5698b/maintainability)](https://codeclimate.com/github/eozelius/teachable_todoable/maintainability)
 # Todoable
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/todoable`. To experiment with that code, run `bin/console` for an interactive prompt.
