@@ -13,7 +13,7 @@ module Todoable
     let(:user) { User.create(email: 'asdf@asdf.com', password: 'asdfasdf') }
 
     describe 'Token based Authentication' do
-      it 'returns false if user attempting to authenticate with -u (email:password) header' do
+      it 'returns if user attempting to authenticate with -u (email:password) header' do
         # No Token header Sent - no error returned
         create_auth_header(user.email, 'asdfasdf')
         post '/authenticate'
@@ -49,6 +49,14 @@ module Todoable
         expect(last_response.status).to eq(200)
         expect(parsed_response[:error_message]).to eq(nil)
         expect(parsed_response[:lists]).not_to eq(nil)
+      end
+
+      it 'rejects tokens that do Not belong to any User' do
+        user.delete
+        create_token_header(user.token)
+        get '/lists'
+        expect(last_response.status).to eq(401)
+        expect(parsed_response[:error_message]).to eq('Invalid Token - user does not exist')
       end
     end
 

@@ -171,7 +171,7 @@ module Todoable
         user = User.find(token: t)
 
         if user.nil?
-          halt 401, JSON.generate(error_message: 'Invalid Token - nil_user')
+          halt 401, JSON.generate(error_message: 'Invalid Token - user does not exist')
         end
 
         twenty_min = 20 * 60
