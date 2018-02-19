@@ -33,6 +33,23 @@ module Todoable
         expect(parsed_response[:error_message]).to eq(nil)
         expect(parsed_response[:lists]).not_to eq(nil)
       end
+
+      it 'rejects tokens that are older than 20 minutes old' do
+        user.token_created_at = Time.now - 1200
+        user.save
+        create_token_header(user.token)
+        get '/lists'
+        expect(last_response.status).to eq(401)
+        expect(parsed_response[:error_message]).to eq('Token has expired, please log in again')
+      end
+
+      it 'accepts valid tokens that are younger than 20 minutes old' do
+        create_token_header(user.token)
+        get '/lists'
+        expect(last_response.status).to eq(200)
+        expect(parsed_response[:error_message]).to eq(nil)
+        expect(parsed_response[:lists]).not_to eq(nil)
+      end
     end
 
     describe 'post /authenticate => email:password Authentication' do

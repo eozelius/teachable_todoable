@@ -5,6 +5,7 @@ Sequel.migration do
       String :email, unique: true
       String :password_digest
       String :token, index: true
+      DateTime :token_created_at
 
       Sequel::Model.plugin :timestamps
     end

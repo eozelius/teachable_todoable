@@ -5,7 +5,7 @@ require 'securerandom'
 module Todoable
   class User < Sequel::Model
     # Database columns
-    # :id, :email, password_digest, :timestamps
+    # :id, :email, password_digest, :token, :token_created_at  :timestamps
 
     # SQL relationships
     one_to_many :lists
@@ -15,6 +15,7 @@ module Todoable
 
     def generate_token!
       self.token = SecureRandom.urlsafe_base64(64)
+      self.token_created_at = Time.now
       save
       token
     end

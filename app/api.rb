@@ -165,20 +165,22 @@ module Todoable
 
       begin
         token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').delete('"') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
-        @token = Base64.decode64(token_digest)
-        # t = Base64.decode64(token_digest)
-        #
-        # user = User.find(token: t)
-        #
-        # if user.nil?
-        #   halt 401, JSON.generate(error_message: 'Invalid Token')
-        # end
-        #
-        # if user.token_timestamp < 20.minutes.ago
-        #   halt 401, JSON.generate(error_message: 'Token has expired, please log in again')
-        # end
-        #
-        # @token = t
+        # @token = Base64.decode64(token_digest)
+        t = Base64.decode64(token_digest)
+
+        user = User.find(token: t)
+
+        if user.nil?
+          halt 401, JSON.generate(error_message: 'Invalid Token - nil_user')
+        end
+
+        twenty_min = 20 * 60
+
+        if Time.now - twenty_min > user.token_created_at
+          halt 401, JSON.generate(error_message: 'Token has expired, please log in again')
+        end
+
+        @token = t
       rescue Exception
         halt 401, JSON.generate(error_message: 'Invalid Token')
       end
