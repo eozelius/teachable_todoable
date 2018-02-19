@@ -23,7 +23,7 @@ module Todoable
 
       it 'email downcase-ness', :db do
         user = User.create(email: 'ASDF@ASDF.COM',
-                        password: 'asdfasdf')
+                           password: 'asdfasdf')
         expect(user.email).to eq('asdf@asdf.com')
       end
 

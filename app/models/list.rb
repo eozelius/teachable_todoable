@@ -12,24 +12,20 @@ module Todoable
 
     # Call Backs
     def before_destroy
-      self.items.each { |i| i.destroy }
+      items.each(&:destroy)
     end
 
     def after_create
-      self.src = "http://todoable.teachable.tech/api/lists/#{self.id}"
+      self.src = "http://todoable.teachable.tech/api/lists/#{id}"
     end
 
     # Validations
     def validate
       super
       # name
-      unless name && name.length >= 1
-        errors.add(:name, 'invalid name')
-      end
+      errors.add(:name, 'invalid name') unless name && name.length >= 1
 
-      unless user_id && user_id > 0
-        errors.add(:user_id, 'invalid user_id')
-      end
+      errors.add(:user_id, 'invalid user_id') unless user_id && user_id > 0
     end
 
     def json_response
@@ -37,7 +33,7 @@ module Todoable
         list: {
           id: id,
           name: name,
-          items: self.items.map { |i| i.json_response }
+          items: items.map(&:json_response)
         }
       }
     end

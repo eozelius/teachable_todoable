@@ -42,7 +42,7 @@ module Todoable
 
       context 'Invalid Data' do
         it 'rejects invalid list_ids' do
-          post "/lists/-1/items", JSON.generate(@grand_canyon_params)
+          post '/lists/-1/items', JSON.generate(@grand_canyon_params)
           expect(last_response.status).to eq(422)
           expect(parsed_response[:error_message]).to eq('List does not exist')
         end
@@ -55,7 +55,7 @@ module Todoable
 
         it 'does not create any new items' do
           item_count = Item.count
-          post "/lists/#{@bucket_list.id}/items", JSON.generate({ invalid_name_key: '' })
+          post "/lists/#{@bucket_list.id}/items", JSON.generate(invalid_name_key: '')
           expect(Item.count).to eq(item_count)
         end
 
@@ -108,49 +108,49 @@ module Todoable
     end
 
     describe 'delete /lists/:list_id/items/:item_id' do
-        context 'valid request ' do
-          it 'returns a 204 (no content), and a blank response' do
-            delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
-            expect(last_response.status).to eq(204)
-            expect(parsed_response).to eq('')
-          end
-
-          it 'deletes the item' do
-            expect(@bucket_list.reload.items).to include(@yosemite)
-            delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
-            expect(@bucket_list.reload.items).not_to include(@yosemite)
-          end
+      context 'valid request ' do
+        it 'returns a 204 (no content), and a blank response' do
+          delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
+          expect(last_response.status).to eq(204)
+          expect(parsed_response).to eq('')
         end
 
-        context 'invalid request' do
-          it 'doesnt delete the item unless the item is owned by the correct user' do
-            qwerty = User.create(email: 'qwerty@qwerty.com', password: 'qwerty')
-            create_token_header(qwerty.token)
-            delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
-            expect(last_response.status).to eq(422)
-            expect(@bucket_list.reload.items).to include(@yosemite)
-          end
-
-          it 'doesnt delete the item unless the item is part of the correct list' do
-            hobbies = @user.add_list(name: 'hobbies')
-            delete "/lists/#{hobbies.id}/items/#{@yosemite.id}"
-            expect(@bucket_list.reload.items).to include(@yosemite)
-          end
-
-          it 'rejects invalid list_ids' do
-            invalid_list_id = '-1'
-            delete "/lists/#{invalid_list_id}/items/#{@yosemite.id}"
-            expect(last_response.status).to eq(422)
-            expect(@bucket_list.reload.items).to include(@yosemite)
-          end
-
-          it 'rejects invalid item_ids' do
-            invalid_item_id = '-1'
-            delete "/lists/#{@bucket_list.id}/items/#{invalid_item_id}"
-            expect(last_response.status).to eq(422)
-            expect(@bucket_list.reload.items).to include(@yosemite)
-          end
+        it 'deletes the item' do
+          expect(@bucket_list.reload.items).to include(@yosemite)
+          delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
+          expect(@bucket_list.reload.items).not_to include(@yosemite)
         end
       end
+
+      context 'invalid request' do
+        it 'doesnt delete the item unless the item is owned by the correct user' do
+          qwerty = User.create(email: 'qwerty@qwerty.com', password: 'qwerty')
+          create_token_header(qwerty.token)
+          delete "/lists/#{@bucket_list.id}/items/#{@yosemite.id}"
+          expect(last_response.status).to eq(422)
+          expect(@bucket_list.reload.items).to include(@yosemite)
+        end
+
+        it 'doesnt delete the item unless the item is part of the correct list' do
+          hobbies = @user.add_list(name: 'hobbies')
+          delete "/lists/#{hobbies.id}/items/#{@yosemite.id}"
+          expect(@bucket_list.reload.items).to include(@yosemite)
+        end
+
+        it 'rejects invalid list_ids' do
+          invalid_list_id = '-1'
+          delete "/lists/#{invalid_list_id}/items/#{@yosemite.id}"
+          expect(last_response.status).to eq(422)
+          expect(@bucket_list.reload.items).to include(@yosemite)
+        end
+
+        it 'rejects invalid item_ids' do
+          invalid_item_id = '-1'
+          delete "/lists/#{@bucket_list.id}/items/#{invalid_item_id}"
+          expect(last_response.status).to eq(422)
+          expect(@bucket_list.reload.items).to include(@yosemite)
+        end
+      end
+    end
   end
 end

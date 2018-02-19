@@ -32,9 +32,9 @@ module Todoable
         create_list(trivial, @user.token)
 
         get '/lists'
-        expect(parsed_response[:lists]).to match([ {:list=>{:id=>1, :name=>"Urgent Things", :items=>[]}},
-                                                   {:list=>{:id=>2, :name=>"Medium Priority", :items=>[]}},
-                                                   {:list=>{:id=>3, :name=>"Low Priority", :items=>[]}} ])
+        expect(parsed_response[:lists]).to match([{ list: { id: 1, name: 'Urgent Things', items: [] } },
+                                                  { list: { id: 2, name: 'Medium Priority', items: [] } },
+                                                  { list: { id: 3, name: 'Low Priority', items: [] } }])
       end
     end
 
@@ -44,9 +44,10 @@ module Todoable
         id = create_list(bucket_list, @user.token)
         get "lists/#{id}"
         expect(parsed_response).to match(list: {
-          id: id,
-          name: 'Bucket List',
-          items: [] } )
+                                           id: id,
+                                           name: 'Bucket List',
+                                           items: []
+                                         })
       end
 
       context 'when List does NOT exist' do
@@ -64,7 +65,7 @@ module Todoable
         it 'returns the ID' do
           list = { name: 'Bucket List' }
           id = create_list(list, @user.token)
-          expect(parsed_response).to match( { id: id })
+          expect(parsed_response).to match(id: id)
         end
       end
 
@@ -106,9 +107,10 @@ module Todoable
 
         it 'Returns the new list once it has been updated' do
           patch "/lists/#{@bucket_list.id}", JSON.generate(name: 'Updated!!!')
-          expect(parsed_response).to include({ list: {
-            id: a_kind_of(Integer),
-            name: 'Updated!!!' }} )
+          expect(parsed_response).to include(list: {
+                                               id: a_kind_of(Integer),
+                                               name: 'Updated!!!'
+                                             })
         end
       end
 
@@ -122,10 +124,11 @@ module Todoable
         it 'Does NOT update the list' do
           patch "/lists/#{@bucket_list.id}", JSON.generate(name: '')
           get "/lists/#{@bucket_list.id}"
-          expect(parsed_response).to include({ list: {
-            name: @bucket_list.name,
-            id: @bucket_list.id,
-            items: [] } })
+          expect(parsed_response).to include(list: {
+                                               name: @bucket_list.name,
+                                               id: @bucket_list.id,
+                                               items: []
+                                             })
         end
       end
     end

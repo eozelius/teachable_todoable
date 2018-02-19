@@ -36,11 +36,11 @@ module Todoable
           .and_return(RecordResult.new(true, { id: 1, token: token }, nil))
 
         post '/authenticate'
-        expect(parsed_response).to eq({ id: 1, token: token })
+        expect(parsed_response).to eq(id: 1, token: token)
       end
     end
 
-    describe 'get /lists' do      
+    describe 'get /lists' do
       it 'retrieves several lists' do
         allow(ledger).to receive(:retrieve)
           .with(token, nil)
@@ -69,7 +69,7 @@ module Todoable
           .and_return(RecordResult.new(true, { id: 2 }, nil))
 
         post '/lists', JSON.generate(dummy_list)
-        expect(parsed_response).to eq({ id: 2 })
+        expect(parsed_response).to eq(id: 2)
       end
     end
 
@@ -81,7 +81,7 @@ module Todoable
           .and_return(RecordResult.new(true, { id: 99 }, nil))
 
         post '/lists/1/items', JSON.generate(dummy_item)
-        expect(parsed_response).to eq({ id: 99 })
+        expect(parsed_response).to eq(id: 99)
       end
     end
 
@@ -93,7 +93,7 @@ module Todoable
           .and_return(RecordResult.new(true, { name: 'new list' }, nil))
 
         patch '/lists/1', JSON.generate(new_list)
-        expect(parsed_response).to eq({ name: 'new list' })
+        expect(parsed_response).to eq(name: 'new list')
       end
     end
 

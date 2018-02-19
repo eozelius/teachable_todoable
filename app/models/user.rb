@@ -15,8 +15,8 @@ module Todoable
 
     def generate_token!
       self.token = SecureRandom.urlsafe_base64(64)
-      self.save
-      self.token
+      save
+      token
     end
 
     def password
@@ -30,7 +30,7 @@ module Todoable
 
     # Call Backs
     def before_destroy
-      self.lists.each { |l| l.destroy }
+      lists.each(&:destroy)
     end
 
     def before_save
@@ -38,7 +38,7 @@ module Todoable
     end
 
     def after_create
-      self.generate_token!
+      generate_token!
     end
 
     # Validations
@@ -48,10 +48,7 @@ module Todoable
         errors.add(:email, 'invalid email')
       end
 
-      unless @password
-        errors.add(:password, 'invalid password')
-      end
+      errors.add(:password, 'invalid password') unless @password
     end
   end
 end
-

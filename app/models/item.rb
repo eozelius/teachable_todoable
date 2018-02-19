@@ -10,20 +10,16 @@ module Todoable
 
     # Callbacks
     def after_create
-      self.src = "http://todoable.teachable.tech/api/lists/#{self.id}"
+      self.src = "http://todoable.teachable.tech/api/lists/#{id}"
     end
 
     # Validations
     def validate
       super
 
-      unless name && name.length >= 1
-        errors.add(:name, 'invalid name')
-      end
+      errors.add(:name, 'invalid name') unless name && name.length >= 1
 
-      unless list_id
-        errors.add(:list_id, 'list_id is required')
-      end
+      errors.add(:list_id, 'list_id is required') unless list_id
     end
 
     def json_response

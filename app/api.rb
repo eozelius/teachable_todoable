@@ -37,7 +37,7 @@ module Todoable
 
     # Creates a list
     post '/lists' do
-      list_params = JSON.parse(request.body.read, { symbolize_names: true })
+      list_params = JSON.parse(request.body.read, symbolize_names: true)
       if list_params.empty?
         halt 422, JSON.generate(error_message: 'List is required')
       end
@@ -55,7 +55,7 @@ module Todoable
 
     # Create an item
     post '/lists/:list_id/items' do
-      item = JSON.parse(request.body.read, { symbolize_names: true })
+      item = JSON.parse(request.body.read, symbolize_names: true)
       if item.empty?
         halt 422, JSON.generate(error_message: 'Item name is required')
       end
@@ -73,7 +73,7 @@ module Todoable
 
     # Updates the list
     patch '/lists/:list_id' do
-      new_list = JSON.parse(request.body.read, { symbolize_names: true })
+      new_list = JSON.parse(request.body.read, symbolize_names: true)
       if new_list.empty?
         halt 422, JSON.generate(error_message: 'List is required')
       end
@@ -146,7 +146,7 @@ module Todoable
 
       begin
         auth_header = @env['HTTP_AUTHORIZATION'] # "Basic <long encrypted string representing email:password>"
-        email_pass_digest = auth_header.split(' ')[1]  # "<long encrypted string representing email:password>"
+        email_pass_digest = auth_header.split(' ')[1] # "<long encrypted string representing email:password>"
         email_pass = Base64.decode64(email_pass_digest).split(':') # [ 'asdf@example.com', 'asdfasdf' ]
         email = email_pass.first
         password = email_pass.last
@@ -164,8 +164,21 @@ module Todoable
       end
 
       begin
-        token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').gsub(/"/, '') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
+        token_digest = @env['HTTP_AUTHORIZATION'].gsub(/Token token=/, '').delete('"') # 0mETCsD-M7Jc54bGiO1GTkXOcxUf-Dtq19Sj4nOscsRnhWvNfeU0KjpMkSxFzaxIw7S6P4ujF18gvYhq3HD_Zw
         @token = Base64.decode64(token_digest)
+        # t = Base64.decode64(token_digest)
+        #
+        # user = User.find(token: t)
+        #
+        # if user.nil?
+        #   halt 401, JSON.generate(error_message: 'Invalid Token')
+        # end
+        #
+        # if user.token_timestamp < 20.minutes.ago
+        #   halt 401, JSON.generate(error_message: 'Token has expired, please log in again')
+        # end
+        #
+        # @token = t
       rescue Exception
         halt 401, JSON.generate(error_message: 'Invalid Token')
       end

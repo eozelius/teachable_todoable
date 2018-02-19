@@ -15,11 +15,11 @@ def create_list(list, token)
   create_token_header(token)
   post '/lists', JSON.generate(list)
   expect(last_response.status).to eq(201)
-  expect(parsed_response).to match({ id: a_kind_of(Integer) })
+  expect(parsed_response).to match(id: a_kind_of(Integer))
   parsed_response[:id] ? parsed_response[:id] : false
 end
 
 def parsed_response
   return '' if last_response.body == ''
-	JSON.parse(last_response.body, { symbolize_names: true })
+  JSON.parse(last_response.body, symbolize_names: true)
 end

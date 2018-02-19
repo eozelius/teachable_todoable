@@ -18,16 +18,14 @@ module Todoable
         }
         RecordResult.new(true, response, nil)
       else
-        #error_message = user.errors || 'user could not be created'
+        # error_message = user.errors || 'user could not be created'
         RecordResult.new(false, nil, 'user could not be created')
       end
     end
 
     def generate_token(email, password)
       user = User.find(email: email)
-      if user.nil?
-        return create_user(email, password)
-      end
+      return create_user(email, password) if user.nil?
 
       if user.password == password
         token = user.generate_token!
@@ -40,9 +38,7 @@ module Todoable
     # Fetch a List
     def retrieve(token, list_id)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       if list_id
         fetch_single_list(user.id, list_id)
@@ -54,9 +50,7 @@ module Todoable
     # Create a List
     def create_list(token, list)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       new_list = List.new(name: list[:name], user_id: user.id)
 
@@ -72,14 +66,10 @@ module Todoable
     # Create an Item
     def create_item(list_id, token, item)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       list = List.find(id: list_id, user_id: user.id)
-      if list.nil?
-        return RecordResult.new(false, nil, 'List does not exist')
-      end
+      return RecordResult.new(false, nil, 'List does not exist') if list.nil?
 
       new_item = Item.new(name: item[:name], list_id: list_id)
 
@@ -88,7 +78,7 @@ module Todoable
         response = { id: new_item.id }
         RecordResult.new(true, response, nil)
       else
-        #error = new_item.errors || 'Error item could not be added to the list'
+        # error = new_item.errors || 'Error item could not be added to the list'
         RecordResult.new(false, nil, 'Item could not be created')
       end
     end
@@ -96,14 +86,10 @@ module Todoable
     # Update a List in the DB
     def update_list(list_id, token, new_list)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       list = List.find(id: list_id, user_id: user.id)
-      if list.nil?
-        return RecordResult.new(false, nil, 'List does not exist')
-      end
+      return RecordResult.new(false, nil, 'List does not exist') if list.nil?
 
       list.set(name: new_list[:name])
 
@@ -124,19 +110,13 @@ module Todoable
     # Update an Item - toggle complete field
     def finish_item(list_id, token, item_id)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       list = List.find(id: list_id, user_id: user.id)
-      if list.nil?
-        return RecordResult.new(false, nil, 'List does not exist')
-      end
+      return RecordResult.new(false, nil, 'List does not exist') if list.nil?
 
       item = Item.find(id: item_id, list_id: list_id)
-      if item.nil?
-        return RecordResult.new(false, nil, 'Item does not exist')
-      end
+      return RecordResult.new(false, nil, 'Item does not exist') if item.nil?
 
       if item.finished_at.nil?
         item.set(finished_at: DateTime.now)
@@ -149,14 +129,10 @@ module Todoable
 
     def delete_list(list_id, token)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       list = List.find(id: list_id, user_id: user.id)
-      if list.nil?
-        return RecordResult.new(false, nil, 'List does not exist')
-      end
+      return RecordResult.new(false, nil, 'List does not exist') if list.nil?
 
       list.destroy
       RecordResult.new(true, 'List successfully deleted', nil)
@@ -164,19 +140,13 @@ module Todoable
 
     def delete_item(list_id, token, item_id)
       user = User.find(token: token)
-      if user.nil?
-        return RecordResult.new(false, nil, 'Invalid Token')
-      end
+      return RecordResult.new(false, nil, 'Invalid Token') if user.nil?
 
       list = List.find(id: list_id, user_id: user.id)
-      if list.nil?
-        return RecordResult.new(false, nil, 'List does not exist')
-      end
+      return RecordResult.new(false, nil, 'List does not exist') if list.nil?
 
       item = Item.find(id: item_id, list_id: list_id)
-      if item.nil?
-        return RecordResult.new(false, nil, 'Item does not exist')
-      end
+      return RecordResult.new(false, nil, 'Item does not exist') if item.nil?
 
       item.destroy
       RecordResult.new(true, 'Item successfully deleted', nil)
@@ -186,7 +156,7 @@ module Todoable
 
     def fetch_all_records(user_id)
       lists = List.where(user_id: user_id).all
-      response = lists.map { |l| l.json_response }
+      response = lists.map(&:json_response)
       RecordResult.new(true, { lists: response }, nil)
     end
 

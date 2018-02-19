@@ -18,8 +18,8 @@ module Todoable
           it 'returns new users id and token ' do
             created_user = @ledger.create_user('qwerty@qwerty.com', 'qwerty')
             expect(created_user.success?).to eq(true)
-            expect(created_user.response).to match({ id: a_kind_of(Integer),
-                                                  token: a_kind_of(String) })
+            expect(created_user.response).to match(id: a_kind_of(Integer),
+                                                   token: a_kind_of(String))
           end
         end
 
@@ -37,7 +37,7 @@ module Todoable
           it 'generates and returns a new token' do
             generated_token = @ledger.generate_token(@user.email, 'asdfasdf')
             expect(generated_token.success?).to eq(true)
-            expect(generated_token.response).to match({ token: a_kind_of(String) })
+            expect(generated_token.response).to match(token: a_kind_of(String))
           end
         end
 
@@ -70,8 +70,8 @@ module Todoable
             user_count = User.count
             generated_token = @ledger.generate_token('asdf@asdf.com', 'asdfasdf')
             expect(generated_token.success?).to eq(true)
-            expect(generated_token.response).to match({ id: a_kind_of(Integer),
-                                                        token: a_kind_of(String) })
+            expect(generated_token.response).to match(id: a_kind_of(Integer),
+                                                      token: a_kind_of(String))
             expect(User.count).to eq(user_count + 1)
           end
         end
@@ -84,32 +84,30 @@ module Todoable
           it 'returns a single list' do
             retrieved_list = @ledger.retrieve(@user.token, @bucket_list.id)
             expect(retrieved_list.success?).to eq(true)
-            expect(retrieved_list.response).to match({:list=> { :id=>1,
-                                                                :name=>"Bucket List",
-                                                                :items=>[{ :id=>1,
-                                                                           :name=>"visit grand canyon",
-                                                                           :finished_at=>nil}]}})
+            expect(retrieved_list.response).to match(list: { id: 1,
+                                                             name: 'Bucket List',
+                                                             items: [{ id: 1,
+                                                                       name: 'visit grand canyon',
+                                                                       finished_at: nil }] })
           end
 
           it 'returns a set of lists' do
             @user.add_list(name: 'hobbies')
             retrieved_lists = @ledger.retrieve(@user.token, nil)
             expect(retrieved_lists.success?).to eq(true)
-            expect(retrieved_lists.response).to match({:lists=>
-                                                         [{:list=>{:id=>1, :name=>"Bucket List", :items=>[{ :id=>1,
-                                                                                                            :name=>"visit grand canyon",
-                                                                                                            :finished_at=>nil}]}},
-                                                          {:list=>{:id=>2, :name=>"hobbies", :items=>[]}}]})
+            expect(retrieved_lists.response).to match(lists:                                                          [{ list: { id: 1, name: 'Bucket List', items: [{ id: 1,
+                                                                                                                                                                       name: 'visit grand canyon',
+                                                                                                                                                                       finished_at: nil }] } },
+                                                                                                                       { list: { id: 2, name: 'hobbies', items: [] } }])
           end
 
           it 'returns only the lists that are associated with token' do
             hobbies = @user.add_list(name: 'hobbies')
             retrieved_list = @ledger.retrieve(@user.token, hobbies.id)
             expect(retrieved_list.success?).to eq(true)
-            expect(retrieved_list.response).to match({:list =>
-                                                        { :id=>2,
-                                                          :name=>"hobbies",
-                                                          :items=>[]}})
+            expect(retrieved_list.response).to match(list:                                                         { id: 2,
+                                                                                                                     name: 'hobbies',
+                                                                                                                     items: [] })
           end
         end
 
@@ -141,7 +139,7 @@ module Todoable
 
           it 'returns the list id' do
             created_list = @ledger.create_list(@user.token, books)
-            expect(created_list.response).to match({ id: a_kind_of(Integer) })
+            expect(created_list.response).to match(id: a_kind_of(Integer))
           end
 
           it 'associates the list with the user' do
@@ -163,7 +161,7 @@ module Todoable
           end
 
           it 'returns a helpful error' do
-            created_list = @ledger.create_list(@user.token, { name: nil } )
+            created_list = @ledger.create_list(@user.token, name: nil)
             expect(created_list.success?).to eq(false)
             expect(created_list.error_message).to eq('Error list could not be created')
           end
@@ -184,27 +182,26 @@ module Todoable
           it 'returns the id and new name' do
             updated_list = @ledger.update_list(@bucket_list.id, @user.token, new_bucket_list)
             expect(updated_list.success?).to eq(true)
-            expect(updated_list.response).to match({ :list =>
-                                                       { :id=>1,
-                                                         :name=>new_bucket_list[:name]}})
+            expect(updated_list.response).to match(list:                                                        { id: 1,
+                                                                                                                  name: new_bucket_list[:name] })
           end
         end
 
         context 'list_id, token, or new_list are invalid' do
           it 'rejects invalid list ids' do
-            updated_list = @ledger.update_list(0, @user.token, { name: 'valid new name'})
+            updated_list = @ledger.update_list(0, @user.token, name: 'valid new name')
             expect(updated_list.success?).to eq(false)
             expect(updated_list.error_message).to eq('List does not exist')
           end
 
           it 'rejects invalid tokens' do
-            updated_list = @ledger.update_list(@bucket_list.id, 'invalid user token', { name: 'valid new name' })
+            updated_list = @ledger.update_list(@bucket_list.id, 'invalid user token', name: 'valid new name')
             expect(updated_list.success?).to eq(false)
             expect(updated_list.error_message).to eq('Invalid Token')
           end
 
           it 'rejects invalid updated properties' do
-            updated_list = @ledger.update_list(@bucket_list.id, @user.token, { name: nil } )
+            updated_list = @ledger.update_list(@bucket_list.id, @user.token, name: nil)
             expect(updated_list.success?).to eq(false)
             expect(updated_list.error_message).to eq('Error - list is not valid')
           end
@@ -249,10 +246,9 @@ module Todoable
       end
     end
 
-
     describe 'Item integration methods' do
       describe '#create_item(list_id, token, item)' do
-        let(:yosemite) { { name: 'visit yosemite national park' }}
+        let(:yosemite) { { name: 'visit yosemite national park' } }
 
         context 'list_id, token and item are valid' do
           it 'creates a new list' do
@@ -283,7 +279,7 @@ module Todoable
           end
 
           it 'rejects invalid items' do
-            created_list = @ledger.create_item(@bucket_list.id, @user.token, { name: nil} )
+            created_list = @ledger.create_item(@bucket_list.id, @user.token, name: nil)
             expect(created_list.success?).to eq(false)
             expect(created_list.error_message).to eq('Item could not be created')
           end
