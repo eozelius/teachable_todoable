@@ -61,7 +61,7 @@ delete '/lists/:list_id/items/:item_id'
 
 ```Item < Sequel::Model``` - Database backed model representing an Item that needs to be accomplished  
 
-## SQL association
+## SQL associations
 
 ```User``` has_many ```List```'s, 
 
@@ -69,7 +69,8 @@ delete '/lists/:list_id/items/:item_id'
 
 ## Gotchas and Caveats
 To create a new Database
-```$ sequel -m "./db/migrations" sqlite3```
+```$ sequel -m "./db/migrations/" sqlite://db/development.db --echo```
+```$ sequel -m "./db/migrations/" sqlite://db/test.db --echo```
 
 ## License
 
