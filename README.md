@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/eozelius/teachable_todoable.svg?branch=master)](https://travis-ci.org/eozelius/teachable_todoable)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d3cdf6ae8c4a59e5698b/maintainability)](https://codeclimate.com/github/eozelius/teachable_todoable/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/d3cdf6ae8c4a59e5698b/test_coverage)](https://codeclimate.com/github/eozelius/teachable_todoable/test_coverage)
 # Teachable's Todoable
 
 Welcome! Thanks for checking out one solution for Teachable's take home coding [exam](http://todoable.teachable.tech/), also see [this blog post](https://medium.com/teachable/how-teachable-revamped-the-backend-take-home-assignment-24e73ac36a0d) for more info.
