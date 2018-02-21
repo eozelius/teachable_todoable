@@ -1,20 +1,19 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=fb6622233b9886678b9a36342abc73a8292ee4234aaf712bb824652551c7615e
+
 sudo: false
 language: ruby
 rvm:
   - 2.4.1
 before_install: gem install bundler -v 1.16.0
-before_script: sequel -m "./db/migrations/" sqlite://db/development.db --echo
-before_script: sequel -m "./db/migrations/" sqlite://db/test.db --echo
-
-env:
-  global:
-    - CC_TEST_REPORTER_ID=fb6622233b9886678b9a36342abc73a8292ee4234aaf712bb824652551c7615e
-
-
 before_script:
+  - sequel -m "./db/migrations/" sqlite://db/development.db --echo
+  - sequel -m "./db/migrations/" sqlite://db/test.db --echo
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+
 script:
   - bundle exec rspec
 after_script:
